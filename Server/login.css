@@ -1,0 +1,15 @@
+container{
+    display: flex;
+    position: absolute;
+    top: 50%;
+    width:100%;
+    justify-content:center;
+    align-items: center;
+}
+
+#loginButton {
+}
+
+body{
+    background-color: #333333;
+}
