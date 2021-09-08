@@ -7,7 +7,8 @@
 */
 
 body{
-    background-color: #c0c781ff;
+    background-color: #333333;
+    color: #d3d3d3;
 }
 
 #tokenSection{
@@ -20,7 +21,8 @@ body{
 
 .container{
     padding: 20px;
-    background-color: #78bc61ff;
+    background-color: #333333;
+    color: #d3d3d3;
 }
 
 #albumImage{
@@ -31,12 +33,21 @@ body{
 
 #trackTitle{
     font-size:3em;
+    color: #d3d3d3;
 }
 
 #trackArtist{
     font-size:2em;
+    color: #d3d3d3;
 }
 
 .welcomeText{
     font-size:2em;
+    color: #d3d3d3;
+}
+
+input[type="text"], textarea, select, selector{
+
+    background-color : #d3d3d3 !important;
+
 }
