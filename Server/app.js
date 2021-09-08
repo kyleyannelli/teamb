@@ -1,4 +1,4 @@
-var redirect_uri = "https://spotify.yannelli.art/"; // change this your value
+var redirect_uri = "https://teamb.dev/player.html"; // change this your value
 
 var client_id = "";
 var client_secret = ""; // In a real app you should not expose your client_secret to the user
@@ -44,10 +44,10 @@ function onPageLoad(){
     refreshRadioButtons();
 }
 
-//removes everything from storage
+//removes everything from storage and logs out
 function removeAll() {
     localStorage.clear();
-    location.reload();
+    window.location.href = "https://teamb.dev/";
     return false;
 }
 
