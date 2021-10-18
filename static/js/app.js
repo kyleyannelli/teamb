@@ -13,7 +13,8 @@ const TRACKS = "https://api.spotify.com/v1/playlists/{{PlaylistId}}/tracks";
 const CURRENTLYPLAYING = "https://api.spotify.com/v1/me/player/currently-playing";
 const SHUFFLE = "https://api.spotify.com/v1/me/player/shuffle";
 
-var clientId = "";
+var clientId = "c6f5c006684341518ba23d7bae85b169";
+var clientSecret = "";
 //& client secret
 
 var accessToken = null;
@@ -67,6 +68,24 @@ function redirect() {
 }
 
 /**
+ * Using the clientId and responseUri this function opens Spotify's Authorization screen
+ */
+function requestAuthorization(){
+    //clientId = document.getElementById("clientId").value;
+    //clientSecret = document.getElementById("clientSecret").value;
+    //localStorage.setItem("client_id", client_id);
+    //localStorage.setItem("client_secret", client_secret); // In a real app you should not expose your client_secret to the user
+
+    let url = AUTHORIZE;
+    url += "?client_id=" + clientId;
+    url += "&response_type=code";
+    url += "&redirect_uri=" + encodeURI(redirectUri);
+    url += "&show_dialog=true";
+    url += "&scope=user-read-private user-read-email user-modify-playback-state user-read-playback-position user-library-read streaming user-read-playback-state user-read-recently-played playlist-read-private";
+    window.location.href = url; // Show Spotify's authorization screen
+}
+
+/**
  * Gets access token from uri
  */
 function getAccessToken(code) {
@@ -78,6 +97,9 @@ function getAccessToken(code) {
     callAuthorizationApi(body);
 }
 
+/**
+ * Gets refresh token from body
+ */
 function refreshAccessToken(){
     refreshToken = localStorage.getItem("refresh_token");
     let body = "grant_type refresh_token";
@@ -95,9 +117,12 @@ function callAuthorizationApi(body) {
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("Authorization", "Basic" + btoa(clientId + ":" + getClientSecret()))
     xhr.send(body);
-    xhr.onload = handleAuthorizationResponse();
+    xhr.onload = handleAuthorizationResponse;
 }
 
+/**
+ * Handles the authorization repsonse from calling the API
+ */
 function handleAuthorizationResponse() {
     if (this.status == 200) {
         var data = JSON.parse(this.responseText);
@@ -142,7 +167,7 @@ function callApi(method, url, body, callback) {
     let xhr = new XMLHttpRequest();
     xhr.open(method, url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
     xhr.send(body);
     xhr.onload = callback;
 }
