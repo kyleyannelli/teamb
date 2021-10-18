@@ -35,7 +35,8 @@ function onPageLoad(){
         }
         else {
             // we have an access token so present device section
-            document.getElementById("playlistSelection").style.display = 'block';
+            document.getElementById("deviceSection").style.display = 'block';
+
             refreshDevices();
             refreshPlaylists();
             currentlyPlaying();
@@ -44,25 +45,11 @@ function onPageLoad(){
     refreshRadioButtons();
 }
 
-//switches into player mode
-function switchPlayerMode() {
-    //hide playlist selection
-    document.getElementById("playlistSelection").style.display = 'none';
-    //show player stuff
-    document.getElementById("deviceSection").style.display = 'block';
-    //refresh devices to
-    refreshDevices();
-    //auto load tracks. Currently theres also a button. Just make the program auto fetch the tracks ~5-10 seconds. Less ugly and less for user to think about
-    fetchTracks();
-    setTimeout(function () {
-        play();
-    }, 100);
-}
 
 //removes everything from storage and logs out
 function removeAll() {
     localStorage.clear();
-    window.location.href = "http://134.122.35.252:2052";
+    window.location.href = "http://134.122.35.252:2052/player";
     return false;
 }
 
@@ -218,16 +205,14 @@ function removeAllItems( elementId ){
 function play(){
     let playlist_id = document.getElementById("playlists").value;
     let trackindex = document.getElementById("tracks").value;
-    // TODO album stuff goes here, implementation of displaying album
-    // let album = document.getElementById("album").value;
-    // if ( album.length > 0 ){
-    //     body.context_uri = album;
-    // }
-    // else{
-    //
-    // }
+    let album = document.getElementById("album").value;
     let body = {};
-    body.context_uri = "spotify:playlist:" + playlist_id;
+    if ( album.length > 0 ){
+        body.context_uri = album;
+    }
+    else{
+        body.context_uri = "spotify:playlist:" + playlist_id;
+    }
     body.offset = {};
     body.offset.position = trackindex.length > 0 ? Number(trackindex) : 0;
     body.offset.position_ms = 0;
