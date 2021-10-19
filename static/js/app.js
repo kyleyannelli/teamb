@@ -10,7 +10,7 @@ var radioButtons = [];
 
 const AUTHORIZE = "https://accounts.spotify.com/authorize"
 const TOKEN = "https://accounts.spotify.com/api/token";
-const PLAYLISTS = "https://api.spotify.com/v1/me/playlists";
+const PLAYLISTS = "https://api.spotify.com/v1/me/playlists?limit=50";
 const DEVICES = "https://api.spotify.com/v1/me/player/devices";
 const PLAY = "https://api.spotify.com/v1/me/player/play";
 const PAUSE = "https://api.spotify.com/v1/me/player/pause";
@@ -21,7 +21,7 @@ const TRACKS = "https://api.spotify.com/v1/playlists/{{PlaylistId}}/tracks";
 const CURRENTLYPLAYING = "https://api.spotify.com/v1/me/player/currently-playing";
 const SHUFFLE = "https://api.spotify.com/v1/me/player/shuffle";
 
-function onPageLoad(){
+function onPageLoad()
     client_id = localStorage.getItem("client_id");
     client_secret = localStorage.getItem("client_secret");
     if ( window.location.search.length > 0 ){
@@ -314,18 +314,18 @@ function currentlyPlaying(){
     callApi( "GET", PLAYER + "?market=US", null, handleCurrentlyPlayingResponse );
 }
 
-function handleCurrentlyPlayingResponse(){
+function handleCurrentlyPlayingResponse() {
     if ( this.status == 200 ){
         var data = JSON.parse(this.responseText);
         console.log(data);
-        if ( data.item != null ){
-            document.getElementById("albumImage").src = data.item.album.images[0].url;
+        if ( data.item != null && document.getElementById("playlistSelection").style.display != "block"){
+            document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
             document.getElementById("trackTitle").innerHTML = data.item.name;
             document.getElementById("trackArtist").innerHTML = data.item.artists[0].name;
         }
 
 
-        if ( data.device != null ){
+        if (data.device != null){
             // select device
             currentDevice = data.device.id;
             document.getElementById('devices').value=currentDevice;
@@ -338,7 +338,7 @@ function handleCurrentlyPlayingResponse(){
             document.getElementById('playlists').value=currentPlaylist;
         }
     }
-    else if ( this.status == 204 ){
+    else if (this.status == 204){
 
     }
     else if ( this.status == 401 ){
@@ -350,7 +350,7 @@ function handleCurrentlyPlayingResponse(){
     }
 }
 
-function saveNewRadioButton(){
+function saveNewRadioButton() {
     let item = {};
     item.deviceId = deviceId();
     item.playlistId = document.getElementById("playlists").value;

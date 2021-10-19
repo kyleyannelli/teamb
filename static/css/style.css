@@ -9,7 +9,15 @@
 body{
     background-color: #333333;
     color: #d3d3d3;
+    /* Full height */
+    height: 100%;
+    backdrop-filter: blur(5px);
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
+
 
 #tokenSection{
     display: none;
@@ -21,15 +29,10 @@ body{
 
 .container{
     padding: 20px;
-    background-color: #333333;
+    /*background-color: #333333; */
     color: #d3d3d3;
 }
 
-#albumImage{
-    width: 300px;
-    float: left;
-    margin: 20px;
-}
 
 #trackTitle{
     font-size:3em;
@@ -44,6 +47,11 @@ body{
 .welcomeText{
     font-size:2em;
     color: #d3d3d3;
+}
+
+#deviceSection {
+    background-color: rgba(0,0,0,0.2);
+    height: 100%;
 }
 
 input[type="text"], textarea, select, selector{

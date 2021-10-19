@@ -12,16 +12,15 @@
 </head>
 <body onload="onPageLoad()">
 
-<div class="container">
+<div class="container" id="albumImage">
     <div id="tokenSection">
     </div>
     <div id="playlistSelection">
         <div class="mb-3">
             <label for="playlists" class="form-label">Playlists</label>
-            <select id="playlists" class="form-control">
+            <select id="playlists" class="form-control" size="4" ondblclick="switchPlayerMode()">
             </select>
-            <input class="btn btn-primary btn-sm mt-3" type="button" onclick="testTheDatabase()" value="Store UID">
-            <input class="btn btn-primary btn-sm mt-3" type="button" onclick="switchPlayerMode()" value="Player Mode">
+            <!-- <input class="btn btn-primary btn-sm mt-3" type="button" onclick="switchPlayerMode()" value="Player Mode"> -->
         </div>
     </div>
     <div id="deviceSection" class="row">
@@ -58,7 +57,6 @@
                     <h1> Currently Playing</h1>
                     <!--<input type="button" class="btn btn-primary btn-sm mt-3" onclick="currentlyPlaying()" value="Refresh Currently Playing">-->
                     <div>
-                        <img id="albumImage" src="">
                         <div id="trackTitle"></div>
                         <div id="trackArtist"></div>
                     </div>
