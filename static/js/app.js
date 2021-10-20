@@ -36,7 +36,7 @@ function onPageLoad() {
             document.getElementById("tokenSection").style.display = 'block';
         }
         else {
-            // we have an access token so present device section
+            // we have an access token so present de
             document.getElementById("playlistSelection").style.display = 'block';
             refreshDevices();
             refreshPlaylists();
@@ -50,13 +50,36 @@ function onPageLoad() {
 function switchPlayerMode() {
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
+    //hide annotation editor
+    document.getElementById("annotationSelection").style.display = 'none';
     //show player stuff
     document.getElementById("deviceSection").style.display = 'block';
     //auto load tracks. Currently theres also a button. Just make the program auto fetch the tracks ~5-10 seconds. Less ugly and less for user to think about
     fetchTracks();
     refreshDevices();
-    transferToWebPlayer();
+    //transferToWebPlayer();
 }
+
+//switches into annotation mode
+function switchAnnotationMode() {
+    //hide player stuff
+    document.getElementById("deviceSection").style.display = 'none';
+    //hide playlist selection
+    document.getElementById("playlistSelection").style.display = 'none';
+    //show annotation editor
+    document.getElementById("annotationSelection").style.display = 'block';
+}
+
+//switches to playlist selection but allow player to keep playing
+function switchPlaylistSelection() {
+    //hide player stuff
+    document.getElementById("deviceSection").style.display = 'none';
+    //hide annotation stuff
+    document.getElementById("annotationSelection").style.display = 'none';
+    //show playlist selection
+    document.getElementById("playlistSelection").style.display = 'block';
+}
+
 
 //removes everything from storage and logs out
 function removeAll() {
@@ -198,6 +221,13 @@ function handlePlaylistsResponse(){
         console.log(this.responseText);
         //alert(this.responseText);
     }
+}
+
+function switchIcon() {
+    document.getElementById("buttonArea").remove("fa fa-pause-circle-o");
+    let node = document.createElement("i");
+    document.getElementById("buttonArea").appendChild(node);
+    document.getElementById("buttonArea").classList.add("fa fa-pause-circle-o");
 }
 
 function addPlaylist(item){
@@ -396,7 +426,6 @@ function addRadioButton(item, index){
 }
 
 // Set up the Web Playback SDK
-
 window.onSpotifyPlayerAPIReady = () => {
     const player = new Spotify.Player({
         name: 'Spotify Annotation Player',
@@ -408,13 +437,6 @@ window.onSpotifyPlayerAPIReady = () => {
     player.on('authentication_error', e => console.error(e));
     player.on('account_error', e => console.error(e));
     player.on('playback_error', e => console.error(e));
-
-    // Playback status updates
-    player.on('player_state_changed', state => {
-        console.log(state)
-        $('#current-track').attr('src', state.track_window.current_track.album.images[0].url);
-        $('#current-track-name').text(state.track_window.current_track.name);
-    });
 
     // Ready
     player.on('ready', data => {
