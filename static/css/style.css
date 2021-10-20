@@ -11,7 +11,8 @@ body{
     color: #d3d3d3;
     /* Full height */
     height: 100%;
-    backdrop-filter: blur(5px);
+    width: 100%;
+    backdrop-filter: blur(15px);
     /* Center and scale the image nicely */
     background-position: center;
     background-repeat: no-repeat;
@@ -28,8 +29,8 @@ body{
 }
 
 .container{
-    padding: 20px;
     /*background-color: #333333; */
+    width: 100%;
     color: #d3d3d3;
 }
 
@@ -50,12 +51,17 @@ body{
 }
 
 #deviceSection {
-    background-color: rgba(0,0,0,0.2);
-    height: 100%;
+    background-color: rgba(0,0,0,0.35);
+    width: 100%;
+    min-height: 1000px;
 }
 
 input[type="text"], textarea, select, selector{
 
     background-color : #d3d3d3 !important;
 
+}
+
+#hidden {
+    display: none;
 }

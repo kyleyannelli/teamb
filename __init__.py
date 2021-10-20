@@ -2,6 +2,9 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import jsonify
+import ssl
+context = ssl.SSLContext()
+context.load_cert_chain('certificate.crt', 'private.key')
 
 app = Flask(__name__)
 IS_DEV = app.env == 'development'  # FLASK_ENV env. variable
@@ -26,6 +29,4 @@ def sendSecret():
 def player():
     return render_template("player.html")
 
-
-context = ('server.crt', 'server.key')
-app.run(host="0.0.0.0", port=2052)
+app.run(host="0.0.0.0", port=2052, ssl_context=context)

@@ -1,7 +1,9 @@
-var redirect_uri = "http://134.122.35.252:2052/player"; // change this your value
+var redirect_uri = "https://teamb.dev:2052/player";
 
 var client_id = "";
-var client_secret = ""; // In a real app you should not expose your client_secret to the user
+var client_secret = "";
+
+var web_player_id = "";
 
 var access_token = null;
 var refresh_token = null;
@@ -50,19 +52,16 @@ function switchPlayerMode() {
     document.getElementById("playlistSelection").style.display = 'none';
     //show player stuff
     document.getElementById("deviceSection").style.display = 'block';
-    //refresh devices to
-    refreshDevices();
     //auto load tracks. Currently theres also a button. Just make the program auto fetch the tracks ~5-10 seconds. Less ugly and less for user to think about
     fetchTracks();
-    setTimeout(function () {
-        play();
-    }, 100);
+    refreshDevices();
+    transferToWebPlayer();
 }
 
 //removes everything from storage and logs out
 function removeAll() {
     localStorage.clear();
-    window.location.href = "http://134.122.35.252:2052";
+    window.location.href = "https://teamb.dev:2052";
     return false;
 }
 
@@ -140,7 +139,7 @@ function handleAuthorizationResponse(){
     }
     else {
         console.log(this.responseText);
-        alert(this.responseText);
+        //alert(this.responseText);
     }
 }
 
@@ -160,7 +159,7 @@ function handleDevicesResponse(){
     }
     else {
         console.log(this.responseText);
-        alert(this.responseText);
+        //alert(this.responseText);
     }
 }
 
@@ -197,7 +196,7 @@ function handlePlaylistsResponse(){
     }
     else {
         console.log(this.responseText);
-        alert(this.responseText);
+        //alert(this.responseText);
     }
 }
 
@@ -254,7 +253,15 @@ function previous(){
 function transfer(){
     let body = {};
     body.device_ids = [];
-    body.device_ids.push(deviceId())
+    body.device_ids.push(deviceId());
+    callApi( "PUT", PLAYER, JSON.stringify(body), handleApiResponse );
+}
+
+//transfer function with ability to use string input
+function transferToWebPlayer(){
+    let body = {};
+    body.device_ids = [];
+    body.device_ids.push(web_player_id);
     callApi( "PUT", PLAYER, JSON.stringify(body), handleApiResponse );
 }
 
@@ -271,7 +278,7 @@ function handleApiResponse(){
     }
     else {
         console.log(this.responseText);
-        alert(this.responseText);
+        //alert(this.responseText);
     }
 }
 
@@ -299,7 +306,7 @@ function handleTracksResponse(){
     }
     else {
         console.log(this.responseText);
-        alert(this.responseText);
+        //alert(this.responseText);
     }
 }
 
@@ -346,7 +353,7 @@ function handleCurrentlyPlayingResponse() {
     }
     else {
         console.log(this.responseText);
-        alert(this.responseText);
+        //alert(this.responseText);
     }
 }
 
@@ -390,33 +397,31 @@ function addRadioButton(item, index){
 
 // Set up the Web Playback SDK
 
-// window.onSpotifyPlayerAPIReady = () => {
-//     const player = new Spotify.Player({
-//         name: 'Web Playback SDK Template',
-//         getOAuthToken: cb => { cb(access_token); }
-//     });
-//
-//     // Error handling
-//     player.on('initialization_error', e => console.error(e));
-//     player.on('authentication_error', e => console.error(e));
-//     player.on('account_error', e => console.error(e));
-//     player.on('playback_error', e => console.error(e));
-//
-//     // Playback status updates
-//     player.on('player_state_changed', state => {
-//         console.log(state)
-//         $('#current-track').attr('src', state.track_window.current_track.album.images[0].url);
-//         $('#current-track-name').text(state.track_window.current_track.name);
-//     });
-//
-//     // Ready
-//     player.on('ready', data => {
-//         console.log('Ready with Device ID', data.device_id);
-//
-//         // Play a track using our new device ID
-//         play(data.device_id);
-//     });
-//
-//     // Connect to the player!
-//     player.connect();
-// }
+window.onSpotifyPlayerAPIReady = () => {
+    const player = new Spotify.Player({
+        name: 'Spotify Annotation Player',
+        getOAuthToken: cb => { cb(access_token); }
+    });
+
+    // Error handling
+    player.on('initialization_error', e => console.error(e));
+    player.on('authentication_error', e => console.error(e));
+    player.on('account_error', e => console.error(e));
+    player.on('playback_error', e => console.error(e));
+
+    // Playback status updates
+    player.on('player_state_changed', state => {
+        console.log(state)
+        $('#current-track').attr('src', state.track_window.current_track.album.images[0].url);
+        $('#current-track-name').text(state.track_window.current_track.name);
+    });
+
+    // Ready
+    player.on('ready', data => {
+        console.log('Ready with Device ID', data.device_id);
+        web_player_id = data.device_id;
+    });
+
+    // Connect to the player!
+    player.connect();
+}
