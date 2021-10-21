@@ -319,11 +319,6 @@ function deviceId(){
 }
 
 function transferTracks() {
-    let temp = document.getElementById("trackDropdown").value;
-    if(temp > 0)
-    {
-        removeAllItems(document.getElementById("trackDropdown"));
-    }
     currentSongs.items.forEach((item, index) => addTrackAnnotation(item, index))
 }
 
