@@ -454,7 +454,7 @@ function addRadioButton(item, index){
  * @param trackId trackId of current song
  */
 function getTrackAnalysis(trackId){
-    url = ANALYSIS.replace("{id}", trackid);
+    let url = ANALYSIS.replace("{id}", trackId);
     callApi("GET", url,  null, analyzeWaveform);
 }
 
