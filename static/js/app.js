@@ -21,8 +21,10 @@ const NEXT = "https://api.spotify.com/v1/me/player/next";
 const PREVIOUS = "https://api.spotify.com/v1/me/player/previous";
 const PLAYER = "https://api.spotify.com/v1/me/player";
 const TRACKS = "https://api.spotify.com/v1/playlists/{{PlaylistId}}/tracks";
+const ANALYSIS = "https://api.spotify.com/v1/audio-analysis/{id}";
 const CURRENTLYPLAYING = "https://api.spotify.com/v1/me/player/currently-playing";
 const SHUFFLE = "https://api.spotify.com/v1/me/player/shuffle";
+const USER = "https://api.spotify.com/v1/me"
 
 function onPageLoad() {
     client_id = localStorage.getItem("client_id");
@@ -30,7 +32,7 @@ function onPageLoad() {
     if ( window.location.search.length > 0 ){
         handleRedirect();
     }
-    else{
+    else {
         access_token = localStorage.getItem("access_token");
         if ( access_token == null ){
             // we don't have an access token so present token section
@@ -264,6 +266,8 @@ function play(){
     body.offset.position = trackindex.length > 0 ? Number(trackindex) : 0;
     body.offset.position_ms = 0;
     callApi( "PUT", PLAY + "?device_id=" + deviceId(), JSON.stringify(body), handleApiResponse );
+    document.getElementById("playPause").style.display = 'none';
+    document.getElementById("pausePlay").style.display = 'block';
 }
 
 function shuffle(){
@@ -273,6 +277,8 @@ function shuffle(){
 
 function pause(){
     callApi( "PUT", PAUSE + "?device_id=" + deviceId(), null, handleApiResponse );
+    document.getElementById("pausePlay").style.display = 'none';
+    document.getElementById("playPause").style.display = 'block';
 }
 
 function next(){
@@ -319,6 +325,7 @@ function deviceId(){
     return document.getElementById("devices").value;
 }
 
+//fills annotations editor with songs from current playlist
 function transferTracks() {
     currentSongs.items.forEach((item, index) => addTrackAnnotation(item, index))
 }
@@ -326,11 +333,11 @@ function transferTracks() {
 function addTrackAnnotation(item, index){
     let node = document.createElement("option");
     node.value = index;
-    node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")";
+    node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")" + "url('" + item.item.album.images[0].url + "')";
     document.getElementById("trackDropdown").appendChild(node);
 }
 
-
+//fills player section with songs from current playlist
 function fetchTracks(){
     let playlist_id = document.getElementById("playlists").value;
     if (playlist_id.length > 0){
@@ -372,6 +379,7 @@ function handleCurrentlyPlayingResponse() {
         var data = JSON.parse(this.responseText);
         console.log(data);
         if ( data.item != null && document.getElementById("playlistSelection").style.display != "block"){
+            alert(data.item.track.id);
             document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
             document.getElementById("trackTitle").innerHTML = data.item.name;
             document.getElementById("trackArtist").innerHTML = data.item.artists[0].name;
@@ -439,6 +447,59 @@ function addRadioButton(item, index){
     node.innerText = index;
     node.onclick = function() { onRadioButton( item.deviceId, item.playlistId ) };
     document.getElementById("radioButtons").appendChild(node);
+}
+
+/**
+ * Gets track analysis for current song. Must take in a trackid when called.
+ * @param trackId trackId of current song
+ */
+function getTrackAnalysis(trackId){
+    url = ANALYSIS.replace("{id}", trackid);
+    callApi("GET", url,  null, analyzeWaveform);
+}
+
+/**
+ * Handles response from API call and creates a .json with each point for
+ *  the waveform.
+ */
+function analyzeWaveform(){
+    if ( this.status == 200 ) {
+        var data = JSON.parse(this.responseText);
+        //Node.js
+        const fs = require('fs');
+
+        let duration = data.track.duration;
+
+        let segments = data.segments.map(segment => {
+            return {
+                start: segment.start / duration,
+                duration: segment.duration / duration,
+                loudness: 1 - (Math.min(Math.max(segment.loudness_max, -35), 0) / -35)
+            }
+        })
+
+        let min = Math.min(...segments.map(s => s.loudness));
+        let max = Math.max(...segments.map(s => s.loudness));
+
+        let levels = [];
+
+        for (let i = 0.000; i < 1; i += 0.001) {
+            let s = segments.find(segment => {
+                return i <= segment.start + segment.duration;
+            })
+
+            let loudness = Math.round((s.loudness / max) * 100) / 100;
+
+            levels.push(loudness);
+        }
+        //Write file out for the different waveform levels
+        fs.writeFile('levels.json', JSON.stringify(levels), (err) => {
+            console.log(err);
+        })
+    }
+    else if ( this.status == 401 ){
+        refreshAccessToken()
+    }
 }
 
 // Set up the Web Playback SDK
