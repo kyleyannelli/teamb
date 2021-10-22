@@ -80,6 +80,7 @@ function switchPlaylistSelection() {
     document.getElementById("annotationSelection").style.display = 'none';
     //show playlist selection
     document.getElementById("playlistSelection").style.display = 'block';
+    removeAllItems("trackDropdown")
 }
 
 
