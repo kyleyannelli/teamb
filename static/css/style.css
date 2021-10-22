@@ -23,15 +23,6 @@ body{
     background-size: cover;
 }
 
-#pausePlay{
-    display: none;
-    position: fixed;
-}
-
-#playPause{
-    position: fixed;
-}
-
 #tokenSection{
     display: none;
 }
@@ -40,18 +31,16 @@ body{
     display: none;
     margin: auto;
     position: absolute;
-    /*top:20%;*/
+    top:20%;
     left:35%
 }
 
 #annotationText{
-    color: #fff;
     background-color: #212529;
     border-color: #212529;
 }
 
 #annotationTime{
-    color: #fff;
     background-color: #212529;
     border-color: #212529;
 }

@@ -266,8 +266,8 @@ function play(){
     body.offset.position = trackindex.length > 0 ? Number(trackindex) : 0;
     body.offset.position_ms = 0;
     callApi( "PUT", PLAY + "?device_id=" + deviceId(), JSON.stringify(body), handleApiResponse );
-    document.getElementById("playPause").style.display = 'none';
-    document.getElementById("pausePlay").style.display = 'block';
+    // document.getElementById("playPause").style.display = 'none';
+    // document.getElementById("pausePlay").style.display = 'block';
 }
 
 function shuffle(){
@@ -277,8 +277,8 @@ function shuffle(){
 
 function pause(){
     callApi( "PUT", PAUSE + "?device_id=" + deviceId(), null, handleApiResponse );
-    document.getElementById("pausePlay").style.display = 'none';
-    document.getElementById("playPause").style.display = 'block';
+    // document.getElementById("pausePlay").style.display = 'none';
+    // document.getElementById("playPause").style.display = 'block';
 }
 
 function next(){
@@ -333,8 +333,19 @@ function transferTracks() {
 function addTrackAnnotation(item, index){
     let node = document.createElement("option");
     node.value = index;
-    node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")" + "url('" + item.item.album.images[0].url + "')";
+    // document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
+    // let albumImage = "img src = '" + "url('" + data.item.album.images[0].url + "')" + "'";
+    node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")";
+    node.src = item.track.album.images[0].url;
+    // "url('" + data.item.album.images[0].url + "')";
     document.getElementById("trackDropdown").appendChild(node);
+}
+
+function setBackground(){
+    let dropdown = document.getElementById("trackDropdown");
+    let image = dropdown.options[dropdown.selectedIndex].src;
+    alert(image);
+    document.body.style.backgroundImage = "url('" + image + "')";
 }
 
 //fills player section with songs from current playlist
@@ -379,7 +390,8 @@ function handleCurrentlyPlayingResponse() {
         var data = JSON.parse(this.responseText);
         console.log(data);
         if ( data.item != null && document.getElementById("playlistSelection").style.display != "block"){
-            alert(data.item.track.id);
+            //call analyze
+            getTrackAnalysis(data.item.id);
             document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
             document.getElementById("trackTitle").innerHTML = data.item.name;
             document.getElementById("trackArtist").innerHTML = data.item.artists[0].name;
