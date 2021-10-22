@@ -4,6 +4,7 @@ from flask import request
 from flask import jsonify
 from pymongo import MongoClient
 from random import randint
+from jsonmerge import merge
 import random
 #KEEP ALL SSL, NEEDED HTTPS FOR WEB PLAYER
 import ssl
@@ -64,16 +65,20 @@ def insertAnno():
     annotation = str(request.args.get('anno', type = str))
     seconds = str(request.args.get('sec', type = str))
     #make receieved annotation into json
-    jsonData = { '_id' : track_id, seconds :  annotation}
-
+    jsonData = { '_id' : track_id, "annotations" : { seconds :  annotation } }
+    #updateJsonData =  ([ { '$match': { '_id': track_id } }, { '$addFields': { seconds : annotation } } ])
     try:
-        insertString = "db." + spotify_uid + ".insert_one(jsonData)"
-        exec(insertString)
+        #insertString = "db." + spotify_uid + ".insert_one(jsonData)"
+        db.DATABASE[spotify_uid].insert_one(jsonData)
         return "done"
     except:
-        updateString = "db." + spotify_uid + ".update_one(jsonData)"
-        exec(updateString)
-        return "appended to object"
+        query = { '_id' : track_id }
+        newJson = { seconds : annotation }
+        existingJson = db.DATABASE[spotify_uid].find(query)
+        mergedJson = merge(newJson, existingJson)
+        updateJsonData =  {"$set" : {"annotations" : 'mergedJson' }}
+        updateString = db.DATABASE[spotify_uid].update(query, updateJsonData)
+        return "New Json: " + str(newJson) + "\n" + "Old Json: " + str(existingJson) + "\n" + "Merged Json: " + str(mergedJson)
 
 #DON'T CHANGE
 app.run(host="0.0.0.0", port=2052, ssl_context=context)
