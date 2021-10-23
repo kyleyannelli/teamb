@@ -37,48 +37,35 @@ def sendSecret():
         return jsonify(message)
     return "hey."
 
-@app.route("/insertRan")
-def inRan():
-    # The limit for the extended ASCII Character set
-    MAX_LIMIT = 122
-
-    random_string = ''
-
-    for _ in range(10):
-        random_integer = random.randint(97, MAX_LIMIT)
-        #    Keep appending random characters using chr(x)
-        random_string += (chr(random_integer))
-
-    jsonData = { 'ranData' : randint(232, 232232) }
-    codeString = "db." + random_string + ".insert_one(jsonData)"
-    exec(codeString)
-    return "success?"
-
 @app.route('/insert')
 def insertAnno():
-    #teamb.dev:2052/insert?page=asdjiasdji&stuff=asdjiasd
-    #https://teamb.dev:2052/insert?uid=SJIDAJSID&track=SJIDIAD&anno=STUFF_HERE_YEAHHH&sec=324
-    #collection
     spotify_uid = str(request.args.get('uid', type = str))
-    #sub collection
     track_id = str(request.args.get('track', type = str))
     annotation = str(request.args.get('anno', type = str))
     seconds = str(request.args.get('sec', type = str))
-    #make receieved annotation into json
+    refresh_token = str(request.args.get('refresh_token', type = str))
+    #     create json with given data
+    #     spotify track id is the id
+    #     then the annotations object holds annotations where seconds is the key to each annotation
     jsonData = { '_id' : track_id, "annotations" : { seconds :  annotation } }
-    #updateJsonData =  ([ { '$match': { '_id': track_id } }, { '$addFields': { seconds : annotation } } ])
+    #   tries to insert json as new. cant create duplicate documents of the id
+    #   so if it fails it goes to the except (catch), and just inserts
+    #   the new annotation into the existing document
     try:
-        #insertString = "db." + spotify_uid + ".insert_one(jsonData)"
-        db.DATABASE[spotify_uid].insert_one(jsonData)
+        db[spotify_uid].insert_one(jsonData)
         return "done"
     except:
+        #   define the query (what we are looking for)
         query = { '_id' : track_id }
+        #   create new json with receieved data
         newJson = { seconds : annotation }
-        existingJson = db.DATABASE[spotify_uid].find(query)
-        mergedJson = merge(newJson, existingJson)
-        updateJsonData =  {"$set" : {"annotations" : 'mergedJson' }}
-        updateString = db.DATABASE[spotify_uid].update(query, updateJsonData)
-        return "New Json: " + str(newJson) + "\n" + "Old Json: " + str(existingJson) + "\n" + "Merged Json: " + str(mergedJson)
+        #   get cursor (array) of existing results
+        existingResults = db[spotify_uid].find(query)
+        #   from the first result merge the existing annotations and the new one
+        mergedJson = merge(newJson, existingResults[0]["annotations"])
+        #   now we overwrite the annotations object in the document with our merged json
+        updateString = db[spotify_uid].update(query, {"$set" : {"annotations" : mergedJson }})
+        return "New Json: " + str(newJson) + "\n" + "Old Json: " + str(existingResults[0]["annotations"]) + "\n" + "Merged Json: " + str(mergedJson)
 
 #DON'T CHANGE
 app.run(host="0.0.0.0", port=2052, ssl_context=context)
