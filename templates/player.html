@@ -29,29 +29,34 @@ playerSelection is where the user can play songs
         </div>
     </div>
     <div id="annotationSelection">
-        <div class="mb-3">
+        <div>
             <label class ="form-label">Annotation Editor</label>
         </div>
-        <div class="mb-3">
+        <div>
             <label for="trackDropdown"></label>
             <select id="trackDropdown" class="form-control" ondblclick="setBackground()"></select>
         </div>
-        <div class="mb-3">
+        <div>
             <label for="annotationText"></label>
             <input type="text" id="annotationText" style="background-color: #212529" name="annotationText" placeholder="Enter annotation">
         </div>
-        <div class="mb-3">
+        <div>
             <label for="annotationTime"></label>
             <input type="text" id="annotationTime" name="annotationTime" placeholder="Enter timestamp">
         </div>
-        <div class="mb-3">
+        <div>
             <input type="button" class="btn btn-dark" onclick="" value="Update">
         </div>
-        <div class="mb-3">
+        <div>
             <label for="songAnnotations"></label>
-            <select id="songAnnotations" size="5"></select>
+            <!-- add default content to select box. JS will remove this because it inserts
+                by removing all items first
+            -->
+            <select id="songAnnotations" size="5">
+                <option>It seems you have no annotations for this song!</option>
+            </select>
         </div>
-        <div class="mb-3">
+        <div>
             <input type="button" class="btn btn-dark" onclick="switchPlayerMode()" value="Player Mode">
             <input type="button" class="btn btn-dark" onclick="removeAll()" value="Logout">
         </div>
