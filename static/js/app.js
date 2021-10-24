@@ -10,6 +10,8 @@ var refresh_token = null;
 var currentPlaylist = "";
 var currentSongs = null;
 var radioButtons = [];
+var userId = "";
+var trackId = "";
 
 const AUTHORIZE = "https://accounts.spotify.com/authorize"
 const TOKEN = "https://accounts.spotify.com/api/token";
@@ -25,6 +27,8 @@ const ANALYSIS = "https://api.spotify.com/v1/audio-analysis/{id}";
 const CURRENTLYPLAYING = "https://api.spotify.com/v1/me/player/currently-playing";
 const SHUFFLE = "https://api.spotify.com/v1/me/player/shuffle";
 const USER = "https://api.spotify.com/v1/me"
+const INSERT = "https://teamb.dev:2052/insert"
+const RETRIEVE = "https://teamb.dev:2052/retrieve"
 
 function onPageLoad() {
     client_id = localStorage.getItem("client_id");
@@ -72,6 +76,8 @@ function switchAnnotationMode() {
     //show annotation editor
     document.getElementById("annotationSelection").style.display = 'block';
     transferTracks();
+    callApi("GET", USER, null, handleUserIdResponse);
+    setTimeout(refreshSelectedAnnotationSong, 100);
 }
 
 //switches to playlist selection but allow player to keep playing
@@ -82,7 +88,7 @@ function switchPlaylistSelection() {
     document.getElementById("annotationSelection").style.display = 'none';
     //show playlist selection
     document.getElementById("playlistSelection").style.display = 'block';
-    removeAllItems("trackDropdown")
+    removeAllItems("annotationTrack")
 }
 
 
@@ -265,9 +271,87 @@ function play(){
     body.offset = {};
     body.offset.position = trackindex.length > 0 ? Number(trackindex) : 0;
     body.offset.position_ms = 0;
-    callApi( "PUT", PLAY + "?device_id=" + deviceId(), JSON.stringify(body), handleApiResponse );
+    callApi( "PUT", PLAY + "?device_id=" + deviceId(), JSON.stringify(body), handleApiResponse);
     // document.getElementById("playPause").style.display = 'none';
     // document.getElementById("pausePlay").style.display = 'block';
+}
+
+/**
+ * Take annotation from page and store in mongo
+ */
+function storeAnnotation() {
+    //get annotation text and timestamp from page form
+    //replace whitespace with _
+    let annotation = String(document.getElementById("annotationText").value).replace(/\s/g, '_')
+    let seconds = String(document.getElementById("annotationTime").value)
+    //make sure form isnt empty
+    if(annotation == '' || seconds == '') {
+        alert("Please enter both the annotation and timestamp.")
+        return false
+    }
+    // Get User
+    let dropdown = document.getElementById("annotationTrack");
+    let trackIndex = dropdown.options[dropdown.selectedIndex].value;
+    let id = currentSongs.items[trackIndex].track.id;
+    let annotationData = "?uid=" + userId + "&track=" + id + "&anno=" + annotation + "&sec=" + seconds + "&refresh_token=TESTING"
+
+    //send off to mongodb
+    callApi("GET", INSERT + annotationData, null, null)
+    //refresh annotations for currently selected song
+    //refreshAnnotations()
+    fetchAnnotations();
+}
+
+function handleUserIdResponse() {
+    if(this.status == 200)
+    {
+        userId = JSON.parse(this.responseText)["id"];
+        console.log(userId);
+    }
+    else {
+        console.log(this.responseText);
+        //alert(this.responseText);
+    }
+}
+
+
+function fetchAnnotations() {
+    let dropdown = document.getElementById("annotationTrack");
+    let trackIndex = dropdown.options[dropdown.selectedIndex].value;
+    if(userId != '') callApi("GET", RETRIEVE + "?uid=" + userId + "&track=" + currentSongs.items[trackIndex].track.id, null, handleAnnotationsResponse)
+}
+
+function handleAnnotationsResponse() {
+    if (this.status == 200){
+        var data = JSON.parse(this.responseText);
+        console.log(data);
+        removeAllItems( "songAnnotations" );
+        for(var key in data) {
+            addAnnotations(data[key])
+            console.log(data[key])
+        }
+    }
+    else {
+        console.log(this.responseText);
+        //alert(this.responseText);
+    }
+}
+
+function addAnnotations(annotation){
+    let node = document.createElement("option");
+    node.innerHTML = annotation.replace(/(_)/g, ' ');
+    document.getElementById("songAnnotations").appendChild(node);
+}
+
+function addTrackAnnotation(item, index) {
+    let node = document.createElement("option");
+    node.value = index;
+    // document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
+    // let albumImage = "img src = '" + "url('" + data.item.album.images[0].url + "')" + "'";
+    node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")";
+    node.src = item.track.album.images[0].url;
+    // "url('" + data.item.album.images[0].url + "')";
+    document.getElementById("annotationTrack").appendChild(node);
 }
 
 function shuffle(){
@@ -330,21 +414,11 @@ function transferTracks() {
     currentSongs.items.forEach((item, index) => addTrackAnnotation(item, index))
 }
 
-function addTrackAnnotation(item, index){
-    let node = document.createElement("option");
-    node.value = index;
-    // document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
-    // let albumImage = "img src = '" + "url('" + data.item.album.images[0].url + "')" + "'";
-    node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")";
-    node.src = item.track.album.images[0].url;
-    // "url('" + data.item.album.images[0].url + "')";
-    document.getElementById("trackDropdown").appendChild(node);
-}
-
-function setBackground(){
-    let dropdown = document.getElementById("trackDropdown");
+function refreshSelectedAnnotationSong(){
+    let dropdown = document.getElementById("annotationTrack");
     let image = dropdown.options[dropdown.selectedIndex].src;
-    alert(image);
+    fetchAnnotations();
+    //alert(image);
     document.body.style.backgroundImage = "url('" + image + "')";
 }
 
@@ -536,3 +610,4 @@ window.onSpotifyPlayerAPIReady = () => {
     // Connect to the player!
     player.connect();
 }
+

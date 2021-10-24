@@ -67,5 +67,19 @@ def insertAnno():
         updateString = db[spotify_uid].update(query, {"$set" : {"annotations" : mergedJson }})
         return "New Json: " + str(newJson) + "\n" + "Old Json: " + str(existingResults[0]["annotations"]) + "\n" + "Merged Json: " + str(mergedJson)
 
+@app.route('/retrieve')
+def retrieve():
+    spotify_uid = str(request.args.get('uid', type = str))
+    track_id = str(request.args.get('track', type = str))
+    #   define the query (what we are looking for)
+    query = { '_id' : track_id }
+    result = ""
+    try:
+        result = db[spotify_uid].find(query)[0]["annotations"]
+    except IndexError as e:
+        return jsonify({"0" : "You have no annotations for this song!"})
+
+    return result
+
 #DON'T CHANGE
 app.run(host="0.0.0.0", port=2052, ssl_context=context)
