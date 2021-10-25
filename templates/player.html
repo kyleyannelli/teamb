@@ -42,17 +42,18 @@ playerSelection is where the user can play songs
         </div>
         <div>
             <label for="annotationTime"></label>
-            <input type="text" id="annotationTime" name="annotationTime" placeholder="Enter timestamp" required>
+            <input type="text" id="annotationTime" style="background-color: #212529" name="annotationTime" placeholder="Enter time" required>
         </div>
         <div>
             <input type="button" class="btn btn-dark" onclick="storeAnnotation()" value="Update">
+            <input type="button" class="btn btn-dark" onclick="removeAnnotation()" value="Delete">
         </div>
         <div>
             <label for="songAnnotations"></label>
             <!-- add default content to select box. JS will remove this because it inserts
                 by removing all items first
             -->
-            <select id="songAnnotations" size="5">
+            <select id="songAnnotations" size="5" onclick="setAnnotationFields()">
             </select>
         </div>
         <div>
@@ -77,6 +78,18 @@ playerSelection is where the user can play songs
                 </select>
             </div>
 
+            <div class="row  mt-3" id="trackTitleDiv">
+                <div class="col">
+                    <!--<input type="button" class="btn btn-primary btn-sm mt-3" onclick="currentlyPlaying()" value="Refresh Currently Playing">-->
+                    <div>
+                        <div id="trackTitle"></div>
+                        <div id="trackArtist"></div>
+                    </div>
+                    <div id="waveformDiv">
+                        <canvas id="canvas">
+                    </div>
+                </div>
+            </div>
 
             <div class="row">
                 <div id="buttonArea" class="col">
@@ -87,32 +100,12 @@ playerSelection is where the user can play songs
                     <i class="fa fa-forward" style="font-size:36px;" onclick="next()"></i>
                     <input type="button" class="btn btn-dark" onclick="switchPlaylistSelection()" value="Playlists">
                     <input type="button" class="btn btn-dark" onclick="switchAnnotationMode()" value="Annotation Editor">
-                </div>
-            </div>
-
-
-            <div class="row  mt-3">
-                <div class="col">
-                    <!--<input type="button" class="btn btn-primary btn-sm mt-3" onclick="currentlyPlaying()" value="Refresh Currently Playing">-->
-                    <div>
-                        <div id="trackTitle"></div>
-                        <div id="trackArtist"></div>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="row  mt-3">
-                <div class="col">
-                    <div id="radioButtons"></div>
                     <input type="button" class="btn btn-dark" onclick="removeAll()" value="Logout">
                 </div>
             </div>
-
         </div>
     </div>
 </div>
-
 
 </body>
 

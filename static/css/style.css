@@ -8,13 +8,13 @@
 i {
     padding: 5px;
 }
-html {margin: 0; height: 100%; overflow: hidden}
+html {margin: 0; height: 100%;}
 
 body{
     background-color: #333333;
     color: #d3d3d3;
     /* Full height */
-    margin: 0; height: 100%; overflow: hidden;
+    margin: 0; height: 100%;
     width: 100%;
     backdrop-filter: blur(15px);
     /* Center and scale the image nicely */
@@ -25,6 +25,17 @@ body{
 
 #tokenSection{
     display: none;
+}
+#trackTitleDiv{
+    height: 400px;
+}
+
+#trackTitle{
+    height: 100%;
+}
+
+#trackArtist{
+    height: 100%;
 }
 
 #annotationSelection{
@@ -98,4 +109,14 @@ input[type="text"], textarea, select, selector{
 
 #buttonArea {
     font-size:36px;
+}
+
+#canvas {
+    width: 100%;
+    height: 50%;
+    margin-top: 20px;
+}
+
+#waveformDiv{
+    height: 400px;
 }
