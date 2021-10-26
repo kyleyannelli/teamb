@@ -83,6 +83,7 @@ function switchAnnotationMode() {
     document.getElementById("playlistSelection").style.display = 'none';
     //show annotation editor
     document.getElementById("annotationSelection").style.display = 'block';
+    removeAllItems("annotationTrack")
     transferTracks();
     callApi("GET", USER, null, handleUserIdResponse);
     setTimeout(refreshSelectedAnnotationSong, 100);
@@ -553,6 +554,8 @@ function fetchTracks(){
     console.log("playlist size = " + playlist_size);
     if (playlist_id.length > 0){
         let url = TRACKS.replace("{{PlaylistId}}", playlist_id);
+        //reset jsonarray here otherwise the previous playlists would still be stored
+        jsonArray = []
         callApi( "GET", url, null, handleTracksResponse );
     }
 
@@ -560,6 +563,7 @@ function fetchTracks(){
 
 function handleTracksResponse(){
     if (this.status == 200){
+
         var data = JSON.parse(this.responseText);
             // previousCurrentSongs = currentSongs
             // currentSongs = Object.assign(previousCurrentSongs, data)
