@@ -24,7 +24,7 @@ playerSelection is where the user can play songs
         <div class="mb-3">
             <label for="playlists" class="form-label">Playlists</label>
             <select id="playlists" class="form-control" size="10" ondblclick="switchPlayerMode()"></select>
-            <input type="button" class="btn btn-dark" onclick="removeAll()" value="Logout">
+            <input type="button" class="btn btn-dark" onclick="logout()" value="Logout">
             <!-- <input class="btn btn-primary btn-sm mt-3" type="button" onclick="switchPlayerMode()" value="Player Mode"> -->
         </div>
     </div>
@@ -58,7 +58,7 @@ playerSelection is where the user can play songs
         </div>
         <div>
             <input type="button" class="btn btn-dark" onclick="switchPlayerMode()" value="Player Mode">
-            <input type="button" class="btn btn-dark" onclick="removeAll()" value="Logout">
+            <input type="button" class="btn btn-dark" onclick="logout()" value="Logout">
         </div>
     </div>
     <div id="deviceSection" class="row">
@@ -100,7 +100,7 @@ playerSelection is where the user can play songs
                     <i class="fa fa-forward" style="font-size:36px;" onclick="next()"></i>
                     <input type="button" class="btn btn-dark" onclick="switchPlaylistSelection()" value="Playlists">
                     <input type="button" class="btn btn-dark" onclick="switchAnnotationMode()" value="Annotation Editor">
-                    <input type="button" class="btn btn-dark" onclick="removeAll()" value="Logout">
+                    <input type="button" class="btn btn-dark" onclick="logout()" value="Logout">
                 </div>
             </div>
         </div>

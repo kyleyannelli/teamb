@@ -56,7 +56,9 @@ function onPageLoad() {
     refreshRadioButtons();
 }
 
-//switches into player mode
+/**
+ * switches into player mode
+ */
 function switchPlayerMode() {
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
@@ -71,7 +73,9 @@ function switchPlayerMode() {
     //transferToWebPlayer();
 }
 
-//switches into annotation mode
+/**
+ * switches into annotation mode
+ */
 function switchAnnotationMode() {
     //hide player stuff
     document.getElementById("deviceSection").style.display = 'none';
@@ -84,7 +88,9 @@ function switchAnnotationMode() {
     setTimeout(refreshSelectedAnnotationSong, 100);
 }
 
-//switches to playlist selection but allow player to keep playing
+/**
+ * switches to playlist selection but allow player to keep playing
+ */
 function switchPlaylistSelection() {
     //hide player stuff
     document.getElementById("deviceSection").style.display = 'none';
@@ -98,8 +104,10 @@ function switchPlaylistSelection() {
 }
 
 
-//removes everything from storage and logs out
-function removeAll() {
+/**
+ * removes everything from storage and logs out
+ */
+function logout() {
     localStorage.clear();
     window.location.href = "https://teamb.dev:2052";
     return false;
@@ -210,6 +218,10 @@ function addDevice(item){
     document.getElementById("devices").appendChild(node);
 }
 
+/**
+ * helper function for GET, POST, PUT, and DELETE calls
+ * to Spotify API
+ */
 function callApi(method, url, body, callback){
     let xhr = new XMLHttpRequest();
     xhr.open(method, url, true);
@@ -254,6 +266,9 @@ function addPlaylist(item){
     document.getElementById("playlists").appendChild(node);
 }
 
+/**
+ * clears an HTML component
+ */
 function removeAllItems( elementId ){
     let node = document.getElementById(elementId);
     while (node.firstChild) {
@@ -440,7 +455,9 @@ function transfer(){
     callApi( "PUT", PLAYER, JSON.stringify(body), handleApiResponse );
 }
 
-//transfer function with ability to use string input
+/**
+ * transfer function with ability to use string input
+ */
 function transferToWebPlayer(){
     let body = {};
     body.device_ids = [];
@@ -488,7 +505,10 @@ function deviceId(){
     return document.getElementById("devices").value;
 }
 
-//fills annotations editor with songs from current playlist
+
+/**
+ * fills annotations editor with songs from current playlist
+ */
 function transferTracks() {
     currentSongsOffset = 0;
     for(let i = 0; i < jsonArray.length; i++) {
@@ -496,6 +516,9 @@ function transferTracks() {
     }
 }
 
+/**
+ * changes background image and fills annotations from selected song
+ */
 function refreshSelectedAnnotationSong(){
     let dropdown = document.getElementById("annotationTrack");
     let image = dropdown.options[dropdown.selectedIndex].src;
@@ -504,6 +527,9 @@ function refreshSelectedAnnotationSong(){
     document.body.style.backgroundImage = "url('" + image + "')";
 }
 
+/**
+ * when a user selects a annotation from the box, the text and time fields are filled
+ */
 function setAnnotationFields()
 {
     let annotationBox = document.getElementById("songAnnotations");
@@ -514,7 +540,9 @@ function setAnnotationFields()
     document.getElementById("annotationTime").value = time;
 }
 
-//fills player section with songs from current playlist
+/**
+ * fills player section with songs from current playlist
+ */
 function fetchTracks(){
     currentSongsOffset = 0;
     removeAllItems( "tracks" );
@@ -643,7 +671,7 @@ function addRadioButton(item, index){
 
 /**
  * Gets track analysis for current song. Must take in a trackid when called.
- * @param trackId trackId of current song
+ * @param trackId of current song
  */
 function getTrackAnalysis(trackId){
     let url = ANALYSIS.replace("{id}", trackId);
@@ -652,7 +680,7 @@ function getTrackAnalysis(trackId){
 
 /**
  * Handles response from API call and creates a .json with each point for
- *  the waveform.
+ * the waveform.
  */
 function analyzeWaveform(){
     if ( this.status == 200 ) {
@@ -728,7 +756,9 @@ function drawWaveform(data) {
     }
 }
 
-// Set up the Web Playback SDK
+/**
+ * Set up the Web Playback SDK
+*/
 window.onSpotifyPlayerAPIReady = () => {
     const player = new Spotify.Player({
         name: 'Spotify Annotation Player',
