@@ -64,6 +64,7 @@ function switchPlayerMode() {
     document.getElementById("annotationSelection").style.display = 'none';
     //show player stuff
     document.getElementById("deviceSection").style.display = 'block';
+    document.body.style.backgroundImage = 'none';
     //auto load tracks. Currently theres also a button. Just make the program auto fetch the tracks ~5-10 seconds. Less ugly and less for user to think about
     fetchTracks();
     refreshDevices();
@@ -91,6 +92,7 @@ function switchPlaylistSelection() {
     document.getElementById("annotationSelection").style.display = 'none';
     //show playlist selection
     document.getElementById("playlistSelection").style.display = 'block';
+    document.body.style.backgroundImage = 'none';
     removeAllItems("annotationTrack")
     currentSongsOffset = 0;
 }
