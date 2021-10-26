@@ -86,7 +86,7 @@ function switchAnnotationMode() {
     removeAllItems("annotationTrack")
     transferTracks();
     callApi("GET", USER, null, handleUserIdResponse);
-    setTimeout(refreshSelectedAnnotationSong, 100);
+    setTimeout(refreshSelectedAnnotationSong, 500);
 }
 
 /**
