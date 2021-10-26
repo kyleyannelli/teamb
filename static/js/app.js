@@ -413,7 +413,7 @@ function handleAnnotationsResponse() {
 
 function addAnnotations(annotation, seconds){
     let node = document.createElement("option");
-    node.innerHTML = annotation.replace(/(_)/g, ' ');
+    node.innerHTML = annotation;
     node.value = seconds;
     document.getElementById("songAnnotations").appendChild(node);
 }

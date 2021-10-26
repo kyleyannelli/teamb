@@ -10,6 +10,7 @@ from jsonmerge import merge
 import random
 # KEEP ALL SSL, NEEDED HTTPS FOR WEB PLAYER
 import ssl
+import re
 
 context = ssl.SSLContext()
 
@@ -53,7 +54,8 @@ def insertAnno():
     #     create json with given data
     #     spotify track id is the id
     #     then the annotations object holds annotations where seconds is the key to each annotation
-    jsonData = {'_id': track_id, "annotations": {seconds: annotation}}
+    regexAnnotation = re.sub(r"_+", " ", annotation)
+    jsonData = {'_id': track_id, "annotations": {seconds: regexAnnotation}}
     #   tries to insert json as new. cant create duplicate documents of the id
     #   so if it fails it goes to the except (catch), and just inserts
     #   the new annotation into the existing document
@@ -63,12 +65,13 @@ def insertAnno():
     except:
         #   define the query (what we are looking for)
         query = {'_id': track_id}
+        regexAnnotation = re.sub(r"_+", " ", annotation)
         #   create new json with receieved data
-        newJson = {seconds: annotation}
+        newJson = {seconds: regexAnnotation}
         #   get cursor (array) of existing results
         existingResults = db[spotify_uid].find(query)[0]["annotations"]
         if (seconds in existingResults) != 0:
-            edit(spotify_uid, track_id, annotation, seconds, existingResults)
+            edit(spotify_uid, track_id, regexAnnotation, seconds, existingResults)
             return "updated existing annotation."
         # from the first result merge the existing annotations and the new one
         mergedJson = merge(newJson, existingResults)
@@ -126,7 +129,8 @@ def edit(spt_uid, tk_id, anno, sec, existingResults):
     query = {'_id': tk_id}
     #   create new json with receieved data
     del existingResults[sec]
-    newJson = {sec: anno}
+    regexAnnotation = re.sub(r"_+", " ", anno)
+    newJson = {sec: regexAnnotation}
     mergedJson = merge(newJson, existingResults)
     #   now we overwrite the annotations object in the document with our merged json
     db[spt_uid].update(query, {"$set": {"annotations": mergedJson}})
