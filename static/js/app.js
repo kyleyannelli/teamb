@@ -681,6 +681,7 @@ function analyzeWaveform() {
             clearInterval(intervalId);
 
             intervalId = setInterval(function() {
+                drawWaveform(levels, "canvasBg", -2500)
                 drawWaveforms(levels);
             }, 1000);
 
@@ -759,10 +760,15 @@ function drawWaveform(data, id, offset) {
 
             let h = Math.round(data[i] * height) / 2;
 
-            if ((x / width) < ((progressMs - offset) / currentDuration)) {
-                fill = "orange";
-            } else {
+            if(offset == -1) {
                 fill = "white"
+            }
+            else {
+                if ((x / width) < ((progressMs - offset) / currentDuration)) {
+                    fill = "light-blue";
+                } else {
+                    fill = "white"
+                }
             }
 
             context.fillStyle = fill;
