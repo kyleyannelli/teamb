@@ -2,6 +2,11 @@ var redirect_uri = "https://teamb.dev:2052/player";
 
 var client_id = "";
 var client_secret = "";
+var waveformTop = true;
+//interval ids
+var intervalId = "";
+var playerInterval = "";
+var waveformTimer = "";
 
 var jsonArray = [];
 var web_player_id = "";
@@ -12,9 +17,11 @@ var currentPlaylist = "";
 var radioButtons = [];
 var userId = "";
 var trackId = "";
-var duration = 0;
+var currentTrackIndex = null;
+var currentDuration = 0;
 var progressMs = 0;
 var currentPlayingObject = null;
+var nextPreTrackIndex = null;
 
 const AUTHORIZE = "https://accounts.spotify.com/authorize"
 const TOKEN = "https://accounts.spotify.com/api/token";
@@ -67,7 +74,6 @@ function switchPlayerMode() {
     document.body.style.backgroundImage = 'none';
     //auto load tracks. Currently theres also a button. Just make the program auto fetch the tracks ~5-10 seconds. Less ugly and less for user to think about
     fetchTracks();
-    //transferToWebPlayer();
 }
 
 /**
@@ -86,6 +92,16 @@ function switchAnnotationMode() {
     setTimeout(refreshSelectedAnnotationSong, 500);
 }
 
+function switchPresentMode() {
+    //hide player stuff
+    document.getElementById("deviceSection").style.display = 'none';
+    //hide playlist selection
+    document.getElementById("playlistSelection").style.display = 'none';
+    //show present mode
+    document.getElementById("presentSelection").style.display = 'block';
+}
+
+
 /**
  * switches to playlist selection but allow player to keep playing
  */
@@ -100,7 +116,6 @@ function switchPlaylistSelection() {
     removeAllItems("annotationTrack")
     currentSongsOffset = 0;
 }
-
 
 /**
  * removes everything from storage and logs out
@@ -244,37 +259,6 @@ function removeAllItems(elementId) {
     }
 }
 
-function play() {
-    let playlist_id = document.getElementById("playlists").value;
-    let trackindex = document.getElementById("tracks").value;
-    // TODO album stuff goes here, implementation of displaying album
-    // let album = document.getElementById("album").value;
-    // if ( album.length > 0 ){
-    //     body.context_uri = album;
-    // }
-    // else{
-    //
-    // }
-
-    let body = {};
-    body.context_uri = "spotify:playlist:" + playlist_id;
-    body.offset = {};
-    body.offset.position = trackindex.length > 0 ? Number(trackindex) : 0;
-
-    console.log("Current position of playing: " + progressMs);
-    if(progressMs > 0){
-        body.position_ms = progressMs;
-        console.log("Current playing in if statement is " + progressMs);
-    }
-    else {
-        body.position_ms = 0;
-        console.log("In else statement");
-    }
-    callApi("PUT", PLAY + "?device_id=" + web_player_id, JSON.stringify(body), handleApiResponse);
-    // document.getElementById("playPause").style.display = 'none';
-    // document.getElementById("pausePlay").style.display = 'block';
-}
-
 /**
  * Take annotation from page and store in mongo
  */
@@ -399,18 +383,59 @@ function shuffle() {
     play();
 }
 
+/**
+ * plays song from beginning or resumes
+ */
+function play() {
+    let playlist_id = document.getElementById("playlists").value;
+    let trackIndex = document.getElementById("tracks").value;
+    if(nextPreTrackIndex != null) {
+        trackIndex = nextPreTrackIndex;
+        console.log("nextPre track index before clear " + nextPreTrackIndex);
+        nextPreTrackIndex = null;
+    }
+    else if(currentTrackIndex != trackIndex) {
+        progressMs = 0;
+        currentTrackIndex = trackIndex;
+    }
+    console.log("track index: " + trackIndex);
+    console.log("current track index " + currentTrackIndex);
+    console.log("nextPre track index " + nextPreTrackIndex);
+    let body = {};
+    body.context_uri = "spotify:playlist:" + playlist_id;
+    body.offset = {};
+    body.offset.position = trackIndex;
+    if(progressMs > 0) {
+        body.position_ms = progressMs;
+    }
+    else {
+        body.position_ms = 0;
+    }
+    callApi("PUT", PLAY + "?device_id=" + web_player_id, JSON.stringify(body), handleApiResponse);
+
+}
+
 function pause() {
+    console.log("Paused, current track index: " + currentTrackIndex);
     callApi("PUT", PAUSE + "?device_id=" + web_player_id, null, handlePauseResponse);
-    console.log(progressMs);
     // document.getElementById("pausePlay").style.display = 'none';
     // document.getElementById("playPause").style.display = 'block';
 }
 
 function next() {
+    progressMs = 0;
+    currentTrackIndex++;
+    nextPreTrackIndex = currentTrackIndex;
+    document.getElementById("tracks").value = currentTrackIndex;
+    console.log("Next, current track : " + currentTrackIndex);
     callApi("POST", NEXT + "?device_id=" + web_player_id, null, handleApiResponse);
 }
 
 function previous() {
+    progressMs = 0;
+    currentTrackIndex--;
+    nextPreTrackIndex = currentTrackIndex;
+    document.getElementById("tracks").value = currentTrackIndex;
     callApi("POST", PREVIOUS + "?device_id=" + web_player_id, null, handleApiResponse);
 }
 
@@ -551,7 +576,7 @@ function handleCurrentlyPlayingResponse() {
         console.log(data);
         if (data.item != null && document.getElementById("playlistSelection").style.display != "block") {
             //call analyze
-            getTrackAnalysis(data.item.id);
+            getTrackAnalysis(data.item.id)
             document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
             document.getElementById("trackTitle").innerHTML = data.item.name;
             document.getElementById("trackArtist").innerHTML = data.item.artists[0].name;
@@ -653,25 +678,73 @@ function analyzeWaveform() {
             let loudness = Math.round((s.loudness / max) * 100) / 100;
 
             levels.push(loudness);
-        }
+            clearInterval(intervalId);
 
-        drawWaveforms(levels)
-    } else if (this.status == 401) {
-        refreshAccessToken()
+            intervalId = setInterval(function() {
+                drawWaveforms(levels);
+            }, 1000);
+
+
+        }
     }
+    else if(this.status == 401) {
+        refreshAccessToken();
+    }
+}
+
+function drawWaveforms(data) {
+    let elementTop = document.getElementById("canvasTop")
+    let elementBottom = document.getElementById("canvasBottom")
+    if(waveformTop) {
+        drawWaveform(data, "canvasTop", -1000)
+        drawWaveform(data, "canvasBottom", 0)
+        /**
+         * fade in and out
+         */
+        clearInterval(waveformTimer);
+        var opOut = 1;  // initial opacity
+        var opIn = 0;  // initial opacity
+        waveformTimer = setInterval(function () {
+            if (opOut == 0 || opIn == 1){
+                clearInterval(waveformTimer);
+            }
+            elementBottom.style.opacity = opOut;
+            elementBottom.style.filter = 'alpha(opacity=' + opOut + ")";
+            opOut -= .01;
+            elementTop.style.opacity = opIn;
+            elementTop.style.filter = 'alpha(opacity=' + opIn + ")";
+            opIn += .01;}, 10);
+        waveformTop = false;
+    }
+    else {
+        drawWaveform(data, "canvasTop", 0)
+        drawWaveform(data, "canvasBottom", -1000)
+        /**
+         * fade in and out
+         */
+        clearInterval(waveformTimer);
+        var opOut = 1;  // initial opacity
+        var opIn = 0;  // initial opacity
+        waveformTimer = setInterval(function () {
+            if (opOut == 0 || opIn == 1){
+                clearInterval(waveformTimer);
+            }
+            elementTop.style.opacity = opOut;
+            elementTop.style.filter = 'alpha(opacity=' + opOut + ")";
+            opOut -= .01;
+            elementBottom.style.opacity = opIn;
+            elementBottom.style.filter = 'alpha(opacity=' + opIn + ")";
+            opIn += .01;}, 10);
+        waveformTop = true;
+    }
+
 }
 
 /**
  * Function that uses canvas to draw the waveform for each song.
  * Data is the array of points.
  */
-function drawWaveforms(data) {
-    drawWaveform(data, "canvasBottom", "white")
-    drawWaveform(data, "canvasTop", "orange")
-}
-
-function drawWaveform(data, id, color) {
-    removeAllItems(id)
+function drawWaveform(data, id, offset) {
     let canvas = document.getElementById(id);
     let {height, width} = canvas.parentNode.getBoundingClientRect();
 
@@ -686,7 +759,11 @@ function drawWaveform(data, id, color) {
 
             let h = Math.round(data[i] * height) / 2;
 
-            fill = color;
+            if ((x / width) < ((progressMs - offset) / currentDuration)) {
+                fill = "orange";
+            } else {
+                fill = "white"
+            }
 
             context.fillStyle = fill;
             if (((height / 2) - h) == 0) {
@@ -722,13 +799,17 @@ window.onSpotifyPlayerAPIReady = () => {
         web_player_id = data.device_id;
     });
 
-    player.addListener('player_state_changed', ({position, duration, track_window: {current_track}}) => {
+    player.addListener('player_state_changed', ({paused, position, duration, track_window: {current_track}}) => {
         progressMs = position;
-        this.duration = duration;
+        clearInterval(playerInterval)
+
+        playerInterval = setInterval(function() {
+            progressMs += paused ? 0 : 1000;
+        }, 1000);
+
+        currentDuration = duration;
+        trackId = current_track.id
         currentPlayingObject = current_track;
-        // console.log('Currently Playing', current_track);
-        // console.log('Position in Song', position);
-        // console.log('Duration of Song', duration);
     });
 
     // Connect to the player!

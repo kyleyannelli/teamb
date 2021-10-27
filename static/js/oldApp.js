@@ -214,6 +214,7 @@ function play(){
         body.context_uri = "spotify:playlist:" + playlist_id;
     }
     body.offset = {};
+    if(cur)
     body.offset.position = trackindex.length > 0 ? Number(trackindex) : 0;
     body.offset.position_ms = 0;
     callApi( "PUT", PLAY + "?device_id=" + deviceId(), JSON.stringify(body), handleApiResponse );

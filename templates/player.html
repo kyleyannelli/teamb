@@ -3,7 +3,7 @@ annotationSelection is where the user CRUD song's annotations
 playerSelection is where the user can play songs
 -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 
 <head>
     <meta charset="UTF-8">
@@ -91,12 +91,16 @@ playerSelection is where the user can play songs
                     <i id="pausePlay" class="fa fa-pause-circle-o" style="font-size:36px;" onclick="pause()"></i>
                     <i id="playPause" class="fa fa-play-circle-o" style="font-size:36px;" onclick="play()"></i>
                     <i class="fa fa-forward" style="font-size:36px;" onclick="next()"></i>
+                    <input type="button" class="btn btn-dark" onclick="switchPresentMode()" value="Present">
                     <input type="button" class="btn btn-dark" onclick="switchPlaylistSelection()" value="Playlists">
                     <input type="button" class="btn btn-dark" onclick="switchAnnotationMode()" value="Annotation Editor">
                     <input type="button" class="btn btn-dark" onclick="logout()" value="Logout">
                 </div>
             </div>
         </div>
+    </div>
+    <div id="presentSelection">
+
     </div>
 </div>
 
