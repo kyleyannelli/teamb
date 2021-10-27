@@ -589,8 +589,13 @@ function handleTracksResponse(){
 function addTrack(item, index){
     let node = document.createElement("option");
     node.value = index + currentSongsOffset;
-    node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")";
-    document.getElementById("tracks").appendChild(node);
+    if(item.track != null) {
+        node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")";
+        document.getElementById("tracks").appendChild(node);
+    }
+    else {
+        return;
+    }
 }
 
 function currentlyPlaying(){
