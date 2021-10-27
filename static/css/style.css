@@ -14,7 +14,7 @@ body{
     background-color: #333333;
     color: #d3d3d3;
     /* Full height */
-    margin: 0; height: 100%;
+    margin: 0; height: 200%;
     width: 100%;
     backdrop-filter: blur(15px);
     /* Center and scale the image nicely */
@@ -118,5 +118,15 @@ input[type="text"], textarea, select, selector{
 }
 
 #waveformDiv{
-    height: 400px;
+    height: 200px;
+}
+
+#canvasTop {
+    position: absolute;
+    fill: black;
+}
+
+#canvasBottom {
+    position absolute;
+    fill: red;
 }
