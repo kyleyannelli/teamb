@@ -418,8 +418,7 @@ function play() {
 function pause() {
     console.log("Paused, current track index: " + currentTrackIndex);
     callApi("PUT", PAUSE + "?device_id=" + web_player_id, null, handlePauseResponse);
-    // document.getElementById("pausePlay").style.display = 'none';
-    // document.getElementById("playPause").style.display = 'block';
+    clearInterval(waveformTimer)
 }
 
 function next() {
@@ -437,16 +436,6 @@ function previous() {
     nextPreTrackIndex = currentTrackIndex;
     document.getElementById("tracks").value = currentTrackIndex;
     callApi("POST", PREVIOUS + "?device_id=" + web_player_id, null, handleApiResponse);
-}
-
-/**
- * transfer function with ability to use string input
- */
-function transferToWebPlayer() {
-    let body = {};
-    body.device_ids = [];
-    body.device_ids.push(web_player_id);
-    callApi("PUT", PLAYER, JSON.stringify(body), handleApiResponse);
 }
 
 function handleApiResponse() {
@@ -816,6 +805,7 @@ window.onSpotifyPlayerAPIReady = () => {
         currentDuration = duration;
         trackId = current_track.id
         currentPlayingObject = current_track;
+        currentlyPlaying();
     });
 
     // Connect to the player!
