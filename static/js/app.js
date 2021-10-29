@@ -8,6 +8,7 @@ var intervalId = "";
 var playerInterval = "";
 var waveformTimer = "";
 
+var currentWaveformId = "";
 var currentTrackLevels = "";
 var jsonArray = [];
 var web_player_id = "";
@@ -585,7 +586,7 @@ function handleCurrentlyPlayingResponse() {
         console.log(data);
         if (data.item != null && document.getElementById("playlistSelection").style.display != "block") {
             //call analyze
-            getTrackAnalysis(data.item.id)
+            if(currentWaveformId !== data.item.id) { getTrackAnalysis(data.item.id); }
             document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
             document.getElementById("trackTitle").innerHTML = data.item.name;
             document.getElementById("trackArtist").innerHTML = data.item.artists[0].name;
@@ -703,6 +704,7 @@ function drawWaveformsHandler(levelsData) {
         drawWaveform(levelsData, "canvasBg", -2500)
         drawWaveforms(levelsData);
     }, 1000);
+    currentWaveformId = trackId;
 }
 
 function drawWaveforms(data) {
@@ -834,10 +836,10 @@ window.onSpotifyPlayerAPIReady = () => {
         playerInterval = setInterval(function() {
             progressMs += paused ? 0 : 1000;
         }, 1000);
-
         currentDuration = duration;
         trackId = current_track.id
         currentPlayingObject = current_track;
+        currentlyPlaying();
     });
 
     // Connect to the player!
