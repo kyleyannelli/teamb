@@ -7,7 +7,9 @@ var waveformTop = true;
 var intervalId = "";
 var playerInterval = "";
 var waveformTimer = "";
+var progressTimer = "";
 
+var currentPlaylistJson = [];
 var currentWaveformId = "";
 var currentTrackLevels = "";
 var jsonArray = [];
@@ -19,11 +21,9 @@ var currentPlaylist = "";
 var radioButtons = [];
 var userId = "";
 var trackId = "";
-var currentTrackIndex = null;
 var currentDuration = 0;
 var progressMs = 0;
 var currentPlayingObject = null;
-var nextPreTrackIndex = null;
 
 const AUTHORIZE = "https://accounts.spotify.com/authorize"
 const TOKEN = "https://accounts.spotify.com/api/token";
@@ -117,6 +117,7 @@ function switchPlaylistSelection() {
     document.body.style.backgroundImage = 'none';
     removeAllItems("annotationTrack")
     currentSongsOffset = 0;
+    currentPlaylistJson = [];
 }
 
 /**
@@ -188,7 +189,7 @@ function callAuthorizationApi(body) {
 function handleAuthorizationResponse() {
     if (this.status == 200) {
         var data = JSON.parse(this.responseText);
-        console.log(data);
+        // console.log(data);
         var data = JSON.parse(this.responseText);
         if (data.access_token != undefined) {
             access_token = data.access_token;
@@ -225,7 +226,7 @@ function refreshPlaylists() {
 function handlePlaylistsResponse() {
     if (this.status == 200) {
         var data = JSON.parse(this.responseText);
-        console.log(data);
+        // console.log(data);
         removeAllItems("playlists");
         data.items.forEach(item => addPlaylist(item));
         document.getElementById('playlists').value = currentPlaylist;
@@ -327,7 +328,7 @@ function removeAnnotation() {
 function handleUserIdResponse() {
     if (this.status == 200) {
         userId = JSON.parse(this.responseText)["id"];
-        console.log(userId);
+        // console.log(userId);
     } else {
         console.log(this.responseText);
         //alert(this.responseText);
@@ -342,19 +343,19 @@ function fetchAnnotations() {
     if (trackIndex > 100) {
         arrayIndex = trackIndex.charAt(0);
     }
-    console.log(jsonArray[arrayIndex].items[trackIndex])
-    console.log(trackIndex)
+    // console.log(jsonArray[arrayIndex].items[trackIndex])
+    // console.log(trackIndex)
     if (userId != '') callApi("GET", RETRIEVE + "?uid=" + userId + "&track=" + jsonArray[arrayIndex].items[trackIndex].track.id, null, handleAnnotationsResponse)
 }
 
 function handleAnnotationsResponse() {
     if (this.status == 200) {
         var data = JSON.parse(this.responseText);
-        console.log(data);
+        // console.log(data);
         removeAllItems("songAnnotations");
         for (var key in data) {
             addAnnotations(data[key], key)
-            console.log(data[key], key)
+            // console.log(data[key], key)
         }
     } else {
         console.log(this.responseText);
@@ -391,28 +392,12 @@ function shuffle() {
 function play() {
     let playlist_id = document.getElementById("playlists").value;
     let trackIndex = document.getElementById("tracks").value;
-    if(nextPreTrackIndex != null) {
-        trackIndex = nextPreTrackIndex;
-        console.log("nextPre track index before clear " + nextPreTrackIndex);
-        nextPreTrackIndex = null;
-    }
-    else if(currentTrackIndex != trackIndex) {
-        progressMs = 0;
-        currentTrackIndex = trackIndex;
-    }
-    console.log("track index: " + trackIndex);
-    console.log("current track index " + currentTrackIndex);
-    console.log("nextPre track index " + nextPreTrackIndex);
+
     let body = {};
     body.context_uri = "spotify:playlist:" + playlist_id;
     body.offset = {};
     body.offset.position = trackIndex;
-    if(progressMs > 0) {
-        body.position_ms = progressMs;
-    }
-    else {
-        body.position_ms = 0;
-    }
+    body.position_ms = 0;
     callApi("PUT", PLAY + "?device_id=" + web_player_id, JSON.stringify(body), handleApiResponse);
 
 }
@@ -423,11 +408,7 @@ function play() {
 function seek(position) {
     let playlist_id = document.getElementById("playlists").value;
     let trackIndex = document.getElementById("tracks").value;
-    if(nextPreTrackIndex != null) {
-        trackIndex = nextPreTrackIndex;
-        console.log("nextPre track index before clear " + nextPreTrackIndex);
-        nextPreTrackIndex = null;
-    }
+
     let body = {};
     body.context_uri = "spotify:playlist:" + playlist_id;
     body.offset = {};
@@ -436,26 +417,22 @@ function seek(position) {
     callApi("PUT", PLAY + "?device_id=" + web_player_id, JSON.stringify(body), handleApiResponse);
 }
 
+function handleResume() {
+    seek(progressMs);
+}
+
 function pause() {
-    console.log("Paused, current track index: " + currentTrackIndex);
     callApi("PUT", PAUSE + "?device_id=" + web_player_id, null, handlePauseResponse);
-    clearInterval(waveformTimer)
+    clearInterval(waveformTimer);
 }
 
 function next() {
     progressMs = 0;
-    currentTrackIndex++;
-    nextPreTrackIndex = currentTrackIndex;
-    document.getElementById("tracks").value = currentTrackIndex;
-    console.log("Next, current track : " + currentTrackIndex);
     callApi("POST", NEXT + "?device_id=" + web_player_id, null, handleApiResponse);
 }
 
 function previous() {
     progressMs = 0;
-    currentTrackIndex--;
-    nextPreTrackIndex = currentTrackIndex;
-    document.getElementById("tracks").value = currentTrackIndex;
     callApi("POST", PREVIOUS + "?device_id=" + web_player_id, null, handleApiResponse);
 }
 
@@ -476,8 +453,6 @@ function handleApiResponse() {
 function handlePauseResponse() {
     if (this.status == 200) {
         var data = JSON.parse(this.responseText);
-        console.log(this.responseText);
-        console.log(data.progress_ms);
         progressMs = data.progress_ms;
         setTimeout(currentlyPlaying, 2000);
     } else if (this.status == 204) {
@@ -533,7 +508,6 @@ function fetchTracks() {
     let playlist = document.getElementById("playlists");
     let playlist_size = playlist.options[playlist.selectedIndex].innerText.split("(")[1];
     playlist_size = playlist_size.substring(0, playlist_size.length - 1);
-    console.log("playlist size = " + playlist_size);
     if (playlist_id.length > 0) {
         let url = TRACKS.replace("{{PlaylistId}}", playlist_id);
         //reset jsonarray here otherwise the previous playlists would still be stored
@@ -550,9 +524,9 @@ function handleTracksResponse() {
         // previousCurrentSongs = currentSongs
         // currentSongs = Object.assign(previousCurrentSongs, data)
         jsonArray.push(data);
-        console.log(data);
+        //console.log(data);
         data.items.forEach((item, index) => addTrack(item, index));
-        console.log(data.next);
+        //console.log(data.next);
         if (data.next != null) {
             currentSongsOffset += 100;
             callApi("GET", data.next, null, handleTracksResponse);
@@ -570,7 +544,9 @@ function addTrack(item, index) {
     node.value = index + currentSongsOffset;
     if (item.track != null) {
         node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")";
+        node.id = item.track.id;
         document.getElementById("tracks").appendChild(node);
+        currentPlaylistJson.push({[node.value]: node.id});
     } else {
         return;
     }
@@ -583,10 +559,10 @@ function currentlyPlaying() {
 function handleCurrentlyPlayingResponse() {
     if (this.status == 200) {
         var data = JSON.parse(this.responseText);
-        console.log(data);
         if (data.item != null && document.getElementById("playlistSelection").style.display != "block") {
             //call analyze
             if(currentWaveformId !== data.item.id) { getTrackAnalysis(data.item.id); }
+
             document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
             document.getElementById("trackTitle").innerHTML = data.item.name;
             document.getElementById("trackArtist").innerHTML = data.item.artists[0].name;
@@ -688,7 +664,7 @@ function analyzeWaveform() {
 
             levels.push(loudness);
             currentTrackLevels = levels;
-
+            showProgress();
             drawWaveformsHandler(levels);
         }
     }
@@ -767,7 +743,7 @@ function drawWaveform(data, id, offset) {
     canvas.height = height;
 
     let context = canvas.getContext('2d');
-    console.log(width);
+    //console.log(width);
     for (let x = 0; x < width; x++) {
         if (x % 8 == 0) {
             let i = Math.ceil(data.length * (x / width));
@@ -807,6 +783,26 @@ function handleWaveformClick() {
 }
 
 /**
+ * Show song progress and duration in numbers
+ */
+function showProgress(){
+    var timeDur = Math.round(currentDuration / 1000);
+    var minutesDur = Math.floor(timeDur / 60);
+    var secDur = timeDur - minutesDur * 60 +'';
+
+    document.getElementById("duration").innerHTML = minutesDur + ":" + secDur.padStart(2,'0');
+
+    clearInterval(progressTimer);
+
+    progressTimer = setInterval(function () {
+        var timePro = Math.round(progressMs / 1000);
+        var minutesPro = Math.floor(timePro / 60);
+        var secPro = timePro - minutesPro * 60 +'';
+        document.getElementById("progress").innerHTML = minutesPro + ":" + secPro.padStart(2,'0');
+    })
+}
+
+/**
  * Set up the Web Playback SDK
  */
 window.onSpotifyPlayerAPIReady = () => {
@@ -840,6 +836,12 @@ window.onSpotifyPlayerAPIReady = () => {
         trackId = current_track.id
         currentPlayingObject = current_track;
         currentlyPlaying();
+        for(let i in currentPlaylistJson) {
+            if(currentPlaylistJson[i][i] == trackId) document.getElementById("tracks").value = i;
+        }
+
+        //document.getElementById("tracks").value = ;
+
     });
 
     // Connect to the player!

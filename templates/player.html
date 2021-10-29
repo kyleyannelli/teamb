@@ -82,6 +82,8 @@ playerSelection is where the user can play songs
                         <canvas id="canvasBottom"></canvas>
                         <canvas id="canvasBg" onclick="handleWaveformClick()"></canvas>
                     </div>
+                    <div id="progress"></div>
+                    <div id="duration"></div>
                 </div>
             </div>
 
@@ -90,7 +92,7 @@ playerSelection is where the user can play songs
                     <i class="fa fa-random" style="font-size:36px;" onclick="shuffle()"></i>
                     <i class="fa fa-backward" style="font-size:36px;" onclick="previous()"></i>
                     <i id="pausePlay" class="fa fa-pause-circle-o" style="font-size:36px;" onclick="pause()"></i>
-                    <i id="playPause" class="fa fa-play-circle-o" style="font-size:36px;" onclick="play()"></i>
+                    <i id="playPause" class="fa fa-play-circle-o" style="font-size:36px;" onclick="handleResume()"></i>
                     <i class="fa fa-forward" style="font-size:36px;" onclick="next()"></i>
                     <input type="button" class="btn btn-dark" onclick="switchPresentMode()" value="Present">
                     <input type="button" class="btn btn-dark" onclick="switchPlaylistSelection()" value="Playlists">
