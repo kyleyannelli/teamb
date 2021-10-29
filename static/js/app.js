@@ -661,7 +661,7 @@ function analyzeWaveform() {
             })
 
             let loudness = Math.round((s.loudness / max) * 100) / 100;
-
+            if (loudness == 0) loudness = 0.01
             levels.push(loudness);
             currentTrackLevels = levels;
             showProgress();
