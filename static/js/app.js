@@ -8,6 +8,7 @@ var intervalId = "";
 var playerInterval = "";
 var waveformTimer = "";
 
+var currentTrackLevels = "";
 var jsonArray = [];
 var web_player_id = "";
 var currentSongsOffset = 0;
@@ -662,7 +663,6 @@ function getTrackAnalysis(trackId) {
 function analyzeWaveform() {
     if (this.status == 200) {
         let data = JSON.parse(this.responseText);
-
         duration = data.track.duration;
 
         let segments = data.segments.map(segment => {
@@ -686,19 +686,23 @@ function analyzeWaveform() {
             let loudness = Math.round((s.loudness / max) * 100) / 100;
 
             levels.push(loudness);
-            clearInterval(intervalId);
+            currentTrackLevels = levels;
 
-            intervalId = setInterval(function() {
-                drawWaveform(levels, "canvasBg", -2500)
-                drawWaveforms(levels);
-            }, 1000);
-
-
+            drawWaveformsHandler(levels);
         }
     }
     else if(this.status == 401) {
         refreshAccessToken();
     }
+}
+
+function drawWaveformsHandler(levelsData) {
+    clearInterval(intervalId);
+
+    intervalId = setInterval(function() {
+        drawWaveform(levelsData, "canvasBg", -2500)
+        drawWaveforms(levelsData);
+    }, 1000);
 }
 
 function drawWaveforms(data) {
@@ -707,8 +711,6 @@ function drawWaveforms(data) {
     if(waveformTop) {
         drawWaveform(data, "canvasTop", -1000)
         drawWaveform(data, "canvasBottom", 0)
-        //add click listener for seeking capability
-        document.getElementById("canvasBg").addEventListener("click", handleWaveformClick);
         /**
          * fade in and out
          */
@@ -730,8 +732,6 @@ function drawWaveforms(data) {
     else {
         drawWaveform(data, "canvasTop", 0)
         drawWaveform(data, "canvasBottom", -1000)
-        //add click listener for seeking capability
-        document.getElementById("canvasBg").addEventListener("click", handleWaveformClick);
         /**
          * fade in and out
          */
@@ -801,6 +801,7 @@ function handleWaveformClick() {
     var rect = document.getElementById("canvasBg").getBoundingClientRect();
     var positionPercentage = 1 - ((rect.right - event.clientX) / (rect.right - rect.left));
     seek((positionPercentage * currentDuration));
+    drawWaveformsHandler(currentTrackLevels);
 }
 
 /**
@@ -837,7 +838,6 @@ window.onSpotifyPlayerAPIReady = () => {
         currentDuration = duration;
         trackId = current_track.id
         currentPlayingObject = current_track;
-        currentlyPlaying();
     });
 
     // Connect to the player!
