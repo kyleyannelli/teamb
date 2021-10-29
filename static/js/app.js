@@ -415,6 +415,25 @@ function play() {
 
 }
 
+/**
+ * plays song from specified time position
+ */
+function seek(position) {
+    let playlist_id = document.getElementById("playlists").value;
+    let trackIndex = document.getElementById("tracks").value;
+    if(nextPreTrackIndex != null) {
+        trackIndex = nextPreTrackIndex;
+        console.log("nextPre track index before clear " + nextPreTrackIndex);
+        nextPreTrackIndex = null;
+    }
+    let body = {};
+    body.context_uri = "spotify:playlist:" + playlist_id;
+    body.offset = {};
+    body.offset.position = trackIndex;
+    body.position_ms = position;
+    callApi("PUT", PLAY + "?device_id=" + web_player_id, JSON.stringify(body), handleApiResponse);
+}
+
 function pause() {
     console.log("Paused, current track index: " + currentTrackIndex);
     callApi("PUT", PAUSE + "?device_id=" + web_player_id, null, handlePauseResponse);
@@ -688,6 +707,8 @@ function drawWaveforms(data) {
     if(waveformTop) {
         drawWaveform(data, "canvasTop", -1000)
         drawWaveform(data, "canvasBottom", 0)
+        //add click listener for seeking capability
+        document.getElementById("canvasBg").addEventListener("click", handleWaveformClick);
         /**
          * fade in and out
          */
@@ -709,6 +730,8 @@ function drawWaveforms(data) {
     else {
         drawWaveform(data, "canvasTop", 0)
         drawWaveform(data, "canvasBottom", -1000)
+        //add click listener for seeking capability
+        document.getElementById("canvasBg").addEventListener("click", handleWaveformClick);
         /**
          * fade in and out
          */
@@ -769,6 +792,15 @@ function drawWaveform(data, id, offset) {
             context.fillRect(x, (height / 2), 4, h);
         }
     }
+}
+
+/**
+ * handles user clicking on waveform
+ */
+function handleWaveformClick() {
+    var rect = document.getElementById("canvasBg").getBoundingClientRect();
+    var positionPercentage = 1 - ((rect.right - event.clientX) / (rect.right - rect.left));
+    seek((positionPercentage * currentDuration));
 }
 
 /**
