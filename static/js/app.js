@@ -5,11 +5,14 @@ var client_secret = "";
 var waveformTop = true;
 //interval ids
 var intervalId = "";
+var annotationInterval = "";
+var annotationIndex = 0;
 var playerInterval = "";
 var waveformTimer = "";
 var progressTimer = "";
 
-var currentPlaylistJson = [];
+var currentPlaylistJson = []
+var currentSongAnnotations = [];
 var currentWaveformId = "";
 var currentTrackLevels = "";
 var jsonArray = [];
@@ -74,6 +77,10 @@ function switchPlayerMode() {
     //show player stuff
     document.getElementById("deviceSection").style.display = 'block';
     document.body.style.backgroundImage = 'none';
+    //hide present
+    document.getElementById("presentSelection").style.display = 'none';
+    showButtons();
+    document.getElementById("tracks").style.display = 'block';
     //auto load tracks. Currently theres also a button. Just make the program auto fetch the tracks ~5-10 seconds. Less ugly and less for user to think about
     fetchTracks();
 }
@@ -82,25 +89,66 @@ function switchPlayerMode() {
  * switches into annotation mode
  */
 function switchAnnotationMode() {
-    //hide player stuff
-    document.getElementById("deviceSection").style.display = 'none';
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
     //show annotation editor
-    document.getElementById("annotationSelection").style.display = 'block';
-    removeAllItems("annotationTrack")
-    transferTracks();
+    // document.getElementById("annotationSelection").style.display = 'block';
+    //removeAllItems("annotationTrack")
+    //transferTracks();
+    if(document.getElementById("annotationSelection").style.display == 'none')
+    {
+        document.getElementById("annotationSelection").style.display = 'block';
+    }
+    else {
+        document.getElementById("annotationSelection").style.display = 'none';
+    }
+    document.getElementById("tracks").size = '';
     callApi("GET", USER, null, handleUserIdResponse);
-    setTimeout(refreshSelectedAnnotationSong, 500);
+    setTimeout(fetchAnnotations, 500);
+
+}
+
+function presentAnnotations() {
+    //console.log("in presentAnnotation")
+    currentSongAnnotations.forEach(annotation => {
+       let x = annotation.split(":");
+       //console.log("X :" + x);
+       //console.log("In for each: " + x[0]);
+       //  if(progressMs < x[1]) {
+       //      if(x[1]-5000 <= progressMs) {
+       //          console.log("x[1]-5000 <= progressMs")
+       //      }
+       //  }
+       if((progressMs < x[1]) && (x[1]-5000 <= progressMs)) {
+           //console.log(x[0]);
+            document.getElementById("annotationHeader").innerHTML = x[0];
+       }
+   })
 }
 
 function switchPresentMode() {
     //hide player stuff
-    document.getElementById("deviceSection").style.display = 'none';
+    //document.getElementById("deviceSection").style.display = 'none';
     //hide playlist selection
+    // setTimeout(fetchAnnotations, 500);
+    switchAnnotationMode();
+    document.getElementById("annotationSelection").style.display = 'none';
     document.getElementById("playlistSelection").style.display = 'none';
     //show present mode
     document.getElementById("presentSelection").style.display = 'block';
+    document.getElementById("tracks").style.display = 'none';
+    document.getElementById("annotationSelection").style.display = 'none';
+    hideButtons();
+
+    clearInterval(annotationInterval);
+
+    annotationInterval = setInterval(function() {
+        presentAnnotations();
+        if(document.getElementById("presentSelection").style.display == 'none')
+        {
+            clearInterval(annotationInterval);
+        }
+    }, 1000);
 }
 
 
@@ -118,6 +166,30 @@ function switchPlaylistSelection() {
     removeAllItems("annotationTrack")
     currentSongsOffset = 0;
     currentPlaylistJson = [];
+}
+
+function hideButtons() {
+    // if(document.getElementById("presentSelection") == 'block') {
+    document.getElementById("present").style.display = 'none';
+    document.getElementById("playlistsButton").style.display = 'none';
+    document.getElementById("annotationButton").style.display = 'none';
+    document.getElementById("logoutButton").style.display = 'none';
+    document.getElementById("exitPresent").style.display = 'block';
+    // }
+    // else {
+    //     document.getElementById("present").style.display = 'block';
+    //     document.getElementById("playlistsButton").style.display = 'block';
+    //     document.getElementById("annotationButton").style.display = 'block';
+    //     document.getElementById("logoutButton").style.display = 'block';
+    // }
+}
+
+function showButtons() {
+    document.getElementById("present").style.display = 'block';
+    document.getElementById("playlistsButton").style.display = 'block';
+    document.getElementById("annotationButton").style.display = 'block';
+    document.getElementById("logoutButton").style.display = 'block';
+    document.getElementById("exitPresent").style.display = 'none';
 }
 
 /**
@@ -269,21 +341,24 @@ function storeAnnotation() {
     //get annotation text and timestamp from page form
     //replace whitespace with _
     let annotation = String(document.getElementById("annotationText").value).replace(/\s/g, '_')
-    let seconds = String(document.getElementById("annotationTime").value)
+    let MMSS = String(document.getElementById("annotationTime").value)
+    let MMSSArray = MMSS.split(':');
+    let milliseconds = (MMSSArray[0] * 60000) + (MMSSArray[1] * 1000);
+    console.log(milliseconds);
     //make sure form isnt empty
-    if (annotation == '' || seconds == '') {
+    if (annotation == '' || MMSS == '') {
         alert("Please enter both the annotation and timestamp.")
         return false
     }
     // Get User
-    let dropdown = document.getElementById("annotationTrack");
+    let dropdown = document.getElementById("tracks");
     let trackIndex = dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
     if (trackIndex > 100) {
         arrayIndex = trackIndex.charAt(0);
     }
     let id = jsonArray[arrayIndex].items[trackIndex].track.id;
-    let annotationData = "?uid=" + userId + "&track=" + id + "&anno=" + annotation + "&sec=" + seconds + "&refresh_token=TESTING"
+    let annotationData = "?uid=" + userId + "&track=" + id + "&anno=" + annotation + "&sec=" + milliseconds + "&refresh_token=TESTING"
 
     //send off to mongodb
     callApi("GET", INSERT + annotationData, null, null)
@@ -300,22 +375,24 @@ function storeAnnotation() {
 function removeAnnotation() {
     //get annotation text and timestamp from page form
     //replace whitespace with _
-    let seconds = String(document.getElementById("annotationTime").value)
+    let MMSS = String(document.getElementById("annotationTime").value)
     //make sure form isnt empty
-    if (seconds == '') {
+    if (MMSS == '') {
         alert("Please enter both the annotation and timestamp.")
         return false
     }
 
     // Get User
-    let dropdown = document.getElementById("annotationTrack");
+    let dropdown = document.getElementById("tracks");
     let trackIndex = dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
     if (trackIndex > 100) {
         arrayIndex = trackIndex.charAt(0);
     }
+    let MMSSArray = MMSS.split(':');
+    let milliseconds = (MMSSArray[0] * 60000) + (MMSSArray[1] * 1000);
     let id = jsonArray[arrayIndex].items[trackIndex].track.id;
-    let removalData = "?uid=" + userId + "&track=" + id + "&sec=" + seconds;
+    let removalData = "?uid=" + userId + "&track=" + id + "&sec=" + milliseconds;
     //send off to mongodb
     callApi("GET", REMOVE + removalData, null, null)
     //refresh annotations for currently selected song
@@ -337,7 +414,7 @@ function handleUserIdResponse() {
 
 
 function fetchAnnotations() {
-    let dropdown = document.getElementById("annotationTrack");
+    let dropdown = document.getElementById("tracks");
     let trackIndex = dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
     if (trackIndex > 100) {
@@ -350,6 +427,7 @@ function fetchAnnotations() {
 
 function handleAnnotationsResponse() {
     if (this.status == 200) {
+        currentSongAnnotations = [];
         var data = JSON.parse(this.responseText);
         // console.log(data);
         removeAllItems("songAnnotations");
@@ -367,6 +445,7 @@ function addAnnotations(annotation, seconds) {
     let node = document.createElement("option");
     node.innerHTML = annotation;
     node.value = seconds;
+    currentSongAnnotations.push(annotation + ":" + seconds);
     document.getElementById("songAnnotations").appendChild(node);
 }
 
@@ -399,7 +478,6 @@ function play() {
     body.offset.position = trackIndex;
     body.position_ms = 0;
     callApi("PUT", PLAY + "?device_id=" + web_player_id, JSON.stringify(body), handleApiResponse);
-
 }
 
 /**
@@ -464,28 +542,6 @@ function handlePauseResponse() {
     }
 }
 
-
-/**
- * fills annotations editor with songs from current playlist
- */
-function transferTracks() {
-    currentSongsOffset = 0;
-    for (let i = 0; i < jsonArray.length; i++) {
-        jsonArray[i].items.forEach((item, index) => addTrackAnnotation(item, index))
-    }
-}
-
-/**
- * changes background image and fills annotations from selected song
- */
-function refreshSelectedAnnotationSong() {
-    let dropdown = document.getElementById("annotationTrack");
-    let image = dropdown.options[dropdown.selectedIndex].src;
-    fetchAnnotations();
-    //alert(image);
-    document.body.style.backgroundImage = "url('" + image + "')";
-}
-
 /**
  * when a user selects a annotation from the box, the text and time fields are filled
  */
@@ -493,9 +549,13 @@ function setAnnotationFields() {
     let annotationBox = document.getElementById("songAnnotations");
     let annotation = annotationBox.options[annotationBox.selectedIndex];
     let text = annotation.innerText;
-    let time = annotation.value;
+    let storedMs = annotation.value;
+    var timePro = Math.round(storedMs / 1000);
+    var minutesPro = Math.floor(timePro / 60);
+    var secPro = timePro - minutesPro * 60 +'';
     document.getElementById("annotationText").value = text;
-    document.getElementById("annotationTime").value = time;
+    document.getElementById("annotationTime").value = minutesPro + ":" + secPro.padStart(2,'0');
+    seek(storedMs);
 }
 
 /**
@@ -563,7 +623,7 @@ function handleCurrentlyPlayingResponse() {
             //call analyze
             if(currentWaveformId !== data.item.id) { getTrackAnalysis(data.item.id); }
 
-            document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
+            document.getElementById("albumCover").src= data.item.album.images[0].url;
             document.getElementById("trackTitle").innerHTML = data.item.name;
             document.getElementById("trackArtist").innerHTML = data.item.artists[0].name;
         }
@@ -755,7 +815,7 @@ function drawWaveform(data, id, offset) {
             }
             else {
                 if ((x / width) < ((progressMs - offset) / currentDuration)) {
-                    fill = "light-blue";
+                    fill = "green";
                 } else {
                     fill = "white"
                 }
@@ -780,6 +840,13 @@ function handleWaveformClick() {
     var positionPercentage = 1 - ((rect.right - event.clientX) / (rect.right - rect.left));
     seek((positionPercentage * currentDuration));
     drawWaveformsHandler(currentTrackLevels);
+
+    setTimeout(function(){
+        var timePro = Math.round(progressMs / 1000);
+        var minutesPro = Math.floor(timePro / 60);
+        var secPro = timePro - minutesPro * 60 +'';
+        document.getElementById("annotationTime").value = minutesPro + ":" + secPro.padStart(2,'0');
+    }, 1000);
 }
 
 /**
