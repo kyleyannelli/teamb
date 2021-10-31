@@ -142,6 +142,10 @@ function switchPresentMode() {
     hideButtons();
     document.getElementById("trackArtist").style.display = "block";
     document.getElementById("trackTitle").style.display = "block";
+
+    callApi("GET", USER, null, handleUserIdResponse);
+    setTimeout(fetchAnnotations, 500);
+
     clearInterval(annotationInterval);
 
     annotationInterval = setInterval(function() {
