@@ -98,31 +98,34 @@ function switchAnnotationMode() {
     if(document.getElementById("annotationSelection").style.display == 'none')
     {
         document.getElementById("annotationSelection").style.display = 'block';
+        document.getElementById("trackArtist").style.display = "none";
+        document.getElementById("trackTitle").style.display = "none";
     }
     else {
         document.getElementById("annotationSelection").style.display = 'none';
+        document.getElementById("trackArtist").style.display = "block";
+        document.getElementById("trackTitle").style.display = "block";
     }
     callApi("GET", USER, null, handleUserIdResponse);
     setTimeout(fetchAnnotations, 500);
-
 }
 
 function presentAnnotations() {
     //console.log("in presentAnnotation")
     currentSongAnnotations.forEach(annotation => {
-       let x = annotation.split(":");
-       //console.log("X :" + x);
-       //console.log("In for each: " + x[0]);
-       //  if(progressMs < x[1]) {
-       //      if(x[1]-5000 <= progressMs) {
-       //          console.log("x[1]-5000 <= progressMs")
-       //      }
-       //  }
-       if((progressMs < x[1]) && (x[1]-5000 <= progressMs)) {
-           //console.log(x[0]);
+        let x = annotation.split(":");
+        //console.log("X :" + x);
+        //console.log("In for each: " + x[0]);
+        //  if(progressMs < x[1]) {
+        //      if(x[1]-5000 <= progressMs) {
+        //          console.log("x[1]-5000 <= progressMs")
+        //      }
+        //  }
+        if((progressMs < x[1]) && (x[1]-5000 <= progressMs)) {
+            //console.log(x[0]);
             document.getElementById("annotationHeader").innerHTML = x[0];
-       }
-   })
+        }
+    })
 }
 
 function switchPresentMode() {
@@ -130,7 +133,6 @@ function switchPresentMode() {
     //document.getElementById("deviceSection").style.display = 'none';
     //hide playlist selection
     // setTimeout(fetchAnnotations, 500);
-    switchAnnotationMode();
     document.getElementById("annotationSelection").style.display = 'none';
     document.getElementById("playlistSelection").style.display = 'none';
     //show present mode
@@ -138,7 +140,8 @@ function switchPresentMode() {
     document.getElementById("annotationSelection").style.display = 'none';
     document.getElementById("tracks").style.display = 'none';
     hideButtons();
-
+    document.getElementById("trackArtist").style.display = "block";
+    document.getElementById("trackTitle").style.display = "block";
     clearInterval(annotationInterval);
 
     annotationInterval = setInterval(function() {
@@ -913,4 +916,3 @@ window.onSpotifyPlayerAPIReady = () => {
     // Connect to the player!
     player.connect();
 }
-
