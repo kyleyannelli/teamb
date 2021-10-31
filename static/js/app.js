@@ -102,7 +102,6 @@ function switchAnnotationMode() {
     else {
         document.getElementById("annotationSelection").style.display = 'none';
     }
-    document.getElementById("tracks").size = '';
     callApi("GET", USER, null, handleUserIdResponse);
     setTimeout(fetchAnnotations, 500);
 
@@ -136,8 +135,8 @@ function switchPresentMode() {
     document.getElementById("playlistSelection").style.display = 'none';
     //show present mode
     document.getElementById("presentSelection").style.display = 'block';
-    document.getElementById("tracks").style.display = 'none';
     document.getElementById("annotationSelection").style.display = 'none';
+    document.getElementById("tracks").style.display = 'none';
     hideButtons();
 
     clearInterval(annotationInterval);
@@ -623,7 +622,7 @@ function handleCurrentlyPlayingResponse() {
             //call analyze
             if(currentWaveformId !== data.item.id) { getTrackAnalysis(data.item.id); }
 
-            document.getElementById("albumCover").src= data.item.album.images[0].url;
+            //document.getElementById("albumCover").src= data.item.album.images[0].url;
             document.getElementById("trackTitle").innerHTML = data.item.name;
             document.getElementById("trackArtist").innerHTML = data.item.artists[0].name;
         }

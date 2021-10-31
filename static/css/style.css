@@ -18,6 +18,10 @@ body{
     width: 100%;
 }
 
+.col {
+    background-color: #333333;
+}
+
 #tokenSection{
     display: none;
 }
@@ -68,10 +72,13 @@ body{
     display: none;
     justify-content: center;
     align-items: center;
-    margin: auto;
+    margin-top: 15%;
     text-align: center;
     vertical-align: middle;
+    position: relative;
+    z-index: 1;
 }
+
 
 #songAnnotations{
     width: 300px;
@@ -160,21 +167,22 @@ input[type="text"], textarea, select, selector{
     position: absolute;
     width: 100%;
     height: 50%;
-    order: 1;
+    mix-blend-mode: lighten;
 }
 
 #canvasBottom {
     position: absolute;
     width: 100%;
     height: 50%;
+    mix-blend-mode: lighten;
 }
 
 #canvasBg {
     position: absolute;
     width: 100%;
     height: 50%;
-    mix-blend-mode: overlay;
 }
+
 
 #progress {
     text-align: center;

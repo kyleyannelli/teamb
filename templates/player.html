@@ -16,8 +16,6 @@ playerSelection is where the user can play songs
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </head>
 <body onload="onPageLoad()">
-
-<div>
     <div id="tokenSection">
     </div>
     <div id="playlistSelection">
@@ -56,7 +54,7 @@ playerSelection is where the user can play songs
             </div>
             </div>
             <div class="row" id="trackTitleDiv">
-                <div id="albumCoverDiv"><img id="albumCover"></div>
+                <!--<div id="albumCoverDiv"><img id="albumCover"></div>-->
                 <div class="col">
                     <!--<input type="button" class="btn btn-primary btn-sm mt-3" onclick="currentlyPlaying()" value="Refresh Currently Playing">-->
                     <div id="top">
@@ -69,14 +67,14 @@ playerSelection is where the user can play songs
                             </div>
                         </div>
                         <div id="waveformDiv">
+                            <canvas id="canvasBg" onclick="handleWaveformClick()"></canvas>
                             <canvas id="canvasTop" onclick="handleWaveformClick()"></canvas>
                             <canvas id="canvasBottom" onclick="handleWaveformClick()"></canvas>
-                            <canvas id="canvasBg" onclick="handleWaveformClick()"></canvas>
                         </div>
                     </div>
                 </div>
                 <div class="row" id="footer">
-                    <select id="tracks" class="form-control" onchange="play()">
+                    <select id="tracks" class="form-control" size="5" onchange="play()">
                     </select>
                     <div id="buttonArea" class="col">
                         <i class="fa fa-random" style="font-size:36px;" onclick="shuffle()"></i>
@@ -100,8 +98,6 @@ playerSelection is where the user can play songs
             </div>
         </div>
     </div>
-</div>
-
 </body>
 
 </html>
