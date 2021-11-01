@@ -100,8 +100,8 @@ function switchAnnotationMode() {
     if(document.getElementById("annotationSection").style.display == 'none')
     {
         document.getElementById("annotationSection").style.display = 'block';
-        document.getElementById("trackArtist").style.display = "none";
-        document.getElementById("trackTitle").style.display = "none";
+        //document.getElementById("trackArtist").style.display = "none";
+        //document.getElementById("trackTitle").style.display = "none";
     }
     else {
         document.getElementById("annotationSection").style.display = 'none';

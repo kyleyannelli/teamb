@@ -145,6 +145,15 @@ html {
     display: none;
 }
 
+#annotationSection {
+    text-align: center;
+}
+
+#timeStamps {
+    height: 20px;
+    margin-bottom: 5px;
+}
+
 /*NAV BAR START*/
 #menuToggle
 {
@@ -162,7 +171,7 @@ html {
 #menuToggle a
 {
     text-decoration: none;
-    color: #232323;
+    color: #d3d3d3;
 
     transition: color 0.3s ease;
 }
@@ -257,14 +266,14 @@ html {
  */
 #menu
 {
-    box-shadow: 0 0 20px rgb(0 0 0 / 75%);
+    /*box-shadow: 0 0 20px rgb(0 0 0 / 75%);*/
     position: absolute;
     width: 300px;
     margin: -100px 0 0 -58px;
     padding: 50px;
     padding-top: 125px;
 
-    background: lightgrey;
+    /*background: lightgrey;*/
     list-style-type: none;
     -webkit-font-smoothing: antialiased;
     /* to stop flickering of text in safari */

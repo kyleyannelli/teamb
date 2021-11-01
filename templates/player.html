@@ -22,30 +22,6 @@
        PLAYER SELECTION
    -->
 <div id="playerSection">
-    <!--
-           ANNOTATION EDITOR SELECTION
-       -->
-    <div id="annotationSection">
-        <div>
-            <label for="annotationText"></label>
-            <input type="text" id="annotationText" style="background-color: #212529" name="annotationText"
-                   placeholder="Enter annotation" required>
-            <label for="annotationTime"></label>
-            <input type="text" id="annotationTime" style="background-color: #212529" name="annotationTime"
-                   placeholder="Enter time" required>
-        </div>
-        <div>
-            <input type="button" onclick="storeAnnotation()" value="Update">
-            <input type="button" onclick="removeAnnotation()" value="Delete">
-        </div>
-        <div>
-            <label for="songAnnotations"></label>
-            <!-- add default content to select box. JS will remove this because it inserts
-                by removing all items first
-            -->
-            <select id="songAnnotations" size="5" onclick="setAnnotationFields()"></select>
-        </div>
-    </div>
     <nav role="navigation">
         <div id="menuToggle">
             <input type="checkbox"/>
@@ -61,11 +37,39 @@
             </ul>
         </div>
     </nav>
+    <!--
+           ANNOTATION EDITOR SELECTION
+       -->
+
+
     <div id="waveformTitleInfoDiv">
         <div id="trackInfo">
             <img id="albumCover">
             <div id="trackTitle"></div>
             <div id="trackArtist"></div>
+        </div>
+        <div id="annotationSection">
+            <div>
+                <label for="annotationText"></label>
+                <input type="text" id="annotationText" style="background-color: #d3d3d3" name="annotationText"
+                       placeholder="Enter annotation" required>
+                <label for="annotationTime"></label>
+                <input type="text" id="annotationTime" style="background-color: #d3d3d3" name="annotationTime"
+                       placeholder="Enter time" required>
+            </div>
+            <div>
+                <input type="button" onclick="storeAnnotation()" value="Update">
+                <input type="button" onclick="removeAnnotation()" value="Delete">
+            </div>
+            <div>
+                <label for="songAnnotations"></label>
+                <!-- add default content to select box. JS will remove this because it inserts
+                    by removing all items first
+                -->
+                <select id="songAnnotations" size="5" onclick="setAnnotationFields()"></select>
+            </div>
+        </div>
+        <div id="timeStamps">
             <div id="progress"></div>
             <div id="duration"></div>
         </div>
@@ -75,8 +79,9 @@
             <canvas id="canvasBottom" onclick="handleWaveformClick()"></canvas>
         </div>
     </div>
+
     <div id="buttonArea">
-        <i class="fa fa-random" style="font-size:36px;" onclick="shuffle()"></i>
+        <i class="fa fa-random" style="font-size:36px;float:left;" onclick="shuffle()"></i>
         <i class="fa fa-backward" style="font-size:36px;" onclick="previous()"></i>
         <i id="pausePlay" class="fa fa-pause-circle-o" style="font-size:36px;" onclick="pause()"></i>
         <i id="playPause" class="fa fa-play-circle-o" style="font-size:36px;" onclick="handleResume()"></i>
