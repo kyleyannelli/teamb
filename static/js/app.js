@@ -966,6 +966,9 @@ function storeDate() {
         return false
     }
 
+    callApi("GET", USER, null, handleUserIdResponse);
+
+    
     let dateData = "?uid=" + userId + "&track=" + trackId + "&date=" + currentDate +"&refresh_token=TESTING"
 
     //send off to mongodb
