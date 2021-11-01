@@ -1,102 +1,108 @@
-<!--playlistSelection is the div where the user selects the playlist.
-annotationSelection is where the user CRUD song's annotations
-playerSelection is where the user can play songs
--->
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify Annotations Player</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body onload="onPageLoad()">
-<div id="tokenSection">
-</div>
+<!--
+        PLAYLIST SELECTION
+    -->
 <div id="playlistSelection">
-    <div class="mb-3">
-        <select id="playlists" class="form-control" size="10" ondblclick="switchPlayerMode()"></select>
-        <input type="button" class="btn btn-dark" onclick="logout()" value="Logout">
-        <!-- <input class="btn btn-primary btn-sm mt-3" type="button" onclick="switchPlayerMode()" value="Player Mode"> -->
+    <div>
+        <select id="playlists" size="10" ondblclick="switchPlayerMode()"></select>
+        <input type="button" onclick="logout()" value="Logout">
     </div>
 </div>
-<div id="deviceSection">
-    <div class="col">
-
+<!--
+       PLAYER SELECTION
+   -->
+<div id="playerSection">
+    <!--
+           ANNOTATION EDITOR SELECTION
+       -->
+    <div id="annotationSection">
         <div>
-            <div id="annotationSelection">
-                <div></div>
-                <div>
-                    <label for="annotationText"></label>
-                    <input type="text" id="annotationText" style="background-color: #212529" name="annotationText" placeholder="Enter annotation" required>
-                </div>
-                <div>
-                    <label for="annotationTime"></label>
-                    <input type="text" id="annotationTime" style="background-color: #212529" name="annotationTime" placeholder="Enter time" required>
-                </div>
-                <div>
-                    <input type="button" class="btn btn-dark" onclick="storeAnnotation()" value="Update">
-                    <input type="button" class="btn btn-dark" onclick="removeAnnotation()" value="Delete">
-                </div>
-                <div>
-                    <label for="songAnnotations"></label>
-                    <!-- add default content to select box. JS will remove this because it inserts
-                        by removing all items first
-                    -->
-                    <select id="songAnnotations" size="5" onclick="setAnnotationFields()">
-                    </select>
-                </div>
-            </div>
+            <label for="annotationText"></label>
+            <input type="text" id="annotationText" style="background-color: #212529" name="annotationText"
+                   placeholder="Enter annotation" required>
+            <label for="annotationTime"></label>
+            <input type="text" id="annotationTime" style="background-color: #212529" name="annotationTime"
+                   placeholder="Enter time" required>
         </div>
-        <div class="row" id="trackTitleDiv">
-            <!--<div id="albumCoverDiv"><img id="albumCover"></div>-->
-            <div class="col">
-                <!--<input type="button" class="btn btn-primary btn-sm mt-3" onclick="currentlyPlaying()" value="Refresh Currently Playing">-->
-                <div id="top">
-                    <div id="trackInfo">
-                        <div>
-                            <div id="trackTitle"></div>
-                            <div id="trackArtist"></div>
-                            <div id="progress"></div>
-                            <div id="duration"></div>
-                        </div>
-                    </div>
-                    <div id="waveformDiv">
-                        <canvas id="canvasBg" onclick="handleWaveformClick()"></canvas>
-                        <canvas id="canvasTop" onclick="handleWaveformClick()"></canvas>
-                        <canvas id="canvasBottom" onclick="handleWaveformClick()"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="row" id="footer">
-                <select id="tracks" class="form-control" size="5" onchange="play()">
-                </select>
-                <div id="buttonArea" class="col">
-                    <i class="fa fa-random" style="font-size:36px;" onclick="shuffle()"></i>
-                    <i class="fa fa-backward" style="font-size:36px;" onclick="previous()"></i>
-                    <i id="pausePlay" class="fa fa-pause-circle-o" style="font-size:36px;" onclick="pause()"></i>
-                    <i id="playPause" class="fa fa-play-circle-o" style="font-size:36px;" onclick="handleResume()"></i>
-                    <i class="fa fa-forward" style="font-size:36px;" onclick="next()"></i>
-                </div>
-                <div class="col">
-                    <input id ="present" type="button" class="btn btn-dark" onclick="switchPresentMode()" value="Present">
-                    <input id ="playlistsButton" type="button" class="btn btn-dark" onclick="switchPlaylistSelection()" value="Playlists">
-                    <input id="annotationButton" type="button" class="btn btn-dark" onclick="switchAnnotationMode()" value="Annotation Editor">
-                    <input id="logoutButton" type="button" class="btn btn-dark" onclick="logout()" value="Logout">
-                    <input id="exitPresent" type="button" class="btn btn-dark" onclick="switchPlayerMode()" value="Exit">
-                </div>
-                <div id="presentSelection">
-                    <h1>Annotation:</h1>
-                    <h2 id="annotationHeader"></h2>
-                </div>
-            </div>
+        <div>
+            <input type="button" onclick="storeAnnotation()" value="Update">
+            <input type="button" onclick="removeAnnotation()" value="Delete">
+        </div>
+        <div>
+            <label for="songAnnotations"></label>
+            <!-- add default content to select box. JS will remove this because it inserts
+                by removing all items first
+            -->
+            <select id="songAnnotations" size="5" onclick="setAnnotationFields()"></select>
         </div>
     </div>
+    <nav role="navigation">
+        <div id="menuToggle">
+            <input type="checkbox"/>
+
+            <span></span>
+            <span></span>
+            <span></span>
+            <ul id="menu">
+                <a onclick="switchPlaylistSelection()"><li>Playlists</li></a>
+                <a onclick="switchPresentMode()"><li>Present</li></a>
+                <a onclick="switchAnnotationMode()"><li>Annotation Editor</li></a>
+                <a onclick="logout()"><li>Logout</li></a>
+            </ul>
+        </div>
+    </nav>
+    <div id="waveformTitleInfoDiv">
+        <div id="trackInfo">
+            <img id="albumCover">
+            <div id="trackTitle"></div>
+            <div id="trackArtist"></div>
+            <div id="progress"></div>
+            <div id="duration"></div>
+        </div>
+        <div id="waveformDiv">
+            <canvas id="canvasBg" onclick="handleWaveformClick()"></canvas>
+            <canvas id="canvasTop" onclick="handleWaveformClick()"></canvas>
+            <canvas id="canvasBottom" onclick="handleWaveformClick()"></canvas>
+        </div>
+    </div>
+    <div id="buttonArea">
+        <i class="fa fa-random" style="font-size:36px;" onclick="shuffle()"></i>
+        <i class="fa fa-backward" style="font-size:36px;" onclick="previous()"></i>
+        <i id="pausePlay" class="fa fa-pause-circle-o" style="font-size:36px;" onclick="pause()"></i>
+        <i id="playPause" class="fa fa-play-circle-o" style="font-size:36px;" onclick="handleResume()"></i>
+        <i class="fa fa-forward" style="font-size:36px;" onclick="next()"></i>
+    </div>
+    <div id="trackDiv">
+        <table id="tracksTable">
+            <thead>
+                <tr>
+                    <th><strong>Title</strong></th>
+                    <th><strong>Artist</strong></th>
+                    <th><strong>Last Played</strong></th>
+                </tr>
+            </thead>
+            <tbody id="tracks">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--
+       PRESENT SECTION
+   -->
+<div id="presentSection">
+
 </div>
 </body>
 

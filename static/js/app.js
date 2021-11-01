@@ -10,6 +10,8 @@ var annotationIndex = 0;
 var playerInterval = "";
 var waveformTimer = "";
 var progressTimer = "";
+var clickedRow = "";
+var currentDate = "";
 
 var currentPlaylistJson = []
 var currentSongAnnotations = [];
@@ -43,6 +45,7 @@ const CURRENTLYPLAYING = "https://api.spotify.com/v1/me/player/currently-playing
 const SHUFFLE = "https://api.spotify.com/v1/me/player/shuffle";
 const USER = "https://api.spotify.com/v1/me"
 const INSERT = "https://teamb.dev:2052/insert"
+const INSERTDATE = "https://teamb.dev:2052/insertDate"
 const RETRIEVE = "https://teamb.dev:2052/retrieve"
 const REMOVE = "https://teamb.dev:2052/remove"
 
@@ -64,6 +67,7 @@ function onPageLoad() {
         }
     }
     refreshRadioButtons();
+    // analyzeWaveform(document.);
 }
 
 /**
@@ -73,14 +77,12 @@ function switchPlayerMode() {
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
     //hide annotation editor
-    document.getElementById("annotationSelection").style.display = 'none';
+    document.getElementById("annotationSection").style.display = 'none';
     //show player stuff
-    document.getElementById("deviceSection").style.display = 'block';
+    document.getElementById("playerSection").style.display = 'block';
     document.body.style.backgroundImage = 'none';
     //hide present
-    document.getElementById("presentSelection").style.display = 'none';
-    showButtons();
-    document.getElementById("tracks").style.display = 'block';
+    document.getElementById("presentSection").style.display = 'none';
     //auto load tracks. Currently theres also a button. Just make the program auto fetch the tracks ~5-10 seconds. Less ugly and less for user to think about
     fetchTracks();
 }
@@ -92,17 +94,17 @@ function switchAnnotationMode() {
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
     //show annotation editor
-    // document.getElementById("annotationSelection").style.display = 'block';
+    // document.getElementById("annotationSection").style.display = 'block';
     //removeAllItems("annotationTrack")
     //transferTracks();
-    if(document.getElementById("annotationSelection").style.display == 'none')
+    if(document.getElementById("annotationSection").style.display == 'none')
     {
-        document.getElementById("annotationSelection").style.display = 'block';
+        document.getElementById("annotationSection").style.display = 'block';
         document.getElementById("trackArtist").style.display = "none";
         document.getElementById("trackTitle").style.display = "none";
     }
     else {
-        document.getElementById("annotationSelection").style.display = 'none';
+        document.getElementById("annotationSection").style.display = 'none';
         document.getElementById("trackArtist").style.display = "block";
         document.getElementById("trackTitle").style.display = "block";
     }
@@ -113,7 +115,12 @@ function switchAnnotationMode() {
 function presentAnnotations() {
     //console.log("in presentAnnotation")
     currentSongAnnotations.forEach(annotation => {
-        let x = annotation.split(":");
+        let splitIndex = annotation.lastIndexOf(":")
+        //console.log(splitIndex);
+        let anno = annotation.substring(0, splitIndex);
+        //console.log(anno);
+        let ms = annotation.substring(splitIndex + 1, annotation.length);
+        //console.log(ms);
         //console.log("X :" + x);
         //console.log("In for each: " + x[0]);
         //  if(progressMs < x[1]) {
@@ -121,31 +128,34 @@ function presentAnnotations() {
         //          console.log("x[1]-5000 <= progressMs")
         //      }
         //  }
-        if((progressMs < x[1]) && (x[1]-5000 <= progressMs)) {
+        if((progressMs < ms) && (ms-5000 <= progressMs)) {
             //console.log(x[0]);
-            document.getElementById("annotationHeader").innerHTML = x[0];
+            let time = Math.round(ms / 1000);
+            let minutes = Math.floor(time / 60);
+            let sec = time - minutes * 60 +'';
+
+            // document.getElementById("duration").innerHTML = minutesDur + ":" + secDur.padStart(2,'0');
+            document.getElementById("annotationHeader").innerHTML = anno + " at " + minutes + ":" + sec.padStart(2,'0');
         }
     })
 }
 
 function switchPresentMode() {
     //hide player stuff
-    //document.getElementById("deviceSection").style.display = 'none';
+    //document.getElementById("playerSection").style.display = 'none';
     //hide playlist selection
     // setTimeout(fetchAnnotations, 500);
-    document.getElementById("annotationSelection").style.display = 'none';
+    document.getElementById("annotationSection").style.display = 'none';
     document.getElementById("playlistSelection").style.display = 'none';
     //show present mode
-    switchAnnotationMode();
-    document.getElementById("presentSelection").style.display = 'block';
-    document.getElementById("annotationSelection").style.display = 'none';
-    document.getElementById("tracks").style.display = 'none';
-    hideButtons();
+    document.getElementById("presentSection").style.display = 'block';
+    document.getElementById("annotationSection").style.display = 'none';
+    //hideButtons();
     document.getElementById("trackArtist").style.display = "block";
     document.getElementById("trackTitle").style.display = "block";
 
-    // callApi("GET", USER, null, handleUserIdResponse);
-    // setTimeout(fetchAnnotations, 500);
+    callApi("GET", USER, null, handleUserIdResponse);
+    setTimeout(fetchAnnotations, 500);
 
     let currentSongId = "";
 
@@ -158,7 +168,7 @@ function switchPresentMode() {
             fetchAnnotations();
         }
         presentAnnotations();
-        if(document.getElementById("presentSelection").style.display == 'none')
+        if(document.getElementById("presentSection").style.display == 'none')
         {
             clearInterval(annotationInterval);
         }
@@ -170,40 +180,49 @@ function switchPresentMode() {
  */
 function switchPlaylistSelection() {
     //hide player stuff
-    document.getElementById("deviceSection").style.display = 'none';
+    document.getElementById("playerSection").style.display = 'none';
     //hide annotation stuff
-    document.getElementById("annotationSelection").style.display = 'none';
+    document.getElementById("annotationSection").style.display = 'none';
     //show playlist selection
     document.getElementById("playlistSelection").style.display = 'block';
     document.body.style.backgroundImage = 'none';
-    removeAllItems("annotationTrack")
+    //removeAllItems("annotationTrack")
     currentSongsOffset = 0;
     currentPlaylistJson = [];
 }
 
-function hideButtons() {
-    // if(document.getElementById("presentSelection") == 'block') {
-    document.getElementById("present").style.display = 'none';
-    document.getElementById("playlistsButton").style.display = 'none';
-    document.getElementById("annotationButton").style.display = 'none';
-    document.getElementById("logoutButton").style.display = 'none';
-    document.getElementById("exitPresent").style.display = 'block';
-    // }
-    // else {
-    //     document.getElementById("present").style.display = 'block';
-    //     document.getElementById("playlistsButton").style.display = 'block';
-    //     document.getElementById("annotationButton").style.display = 'block';
-    //     document.getElementById("logoutButton").style.display = 'block';
-    // }
+function controlMenu() {
+    if(document.getElementById("navBar").style.left == "0px") {
+        document.getElementById("navBar").style = "left: -100px;";
+    }
+    else {
+        document.getElementById("navBar").style.left = "0";
+    }
 }
 
-function showButtons() {
-    document.getElementById("present").style.display = 'block';
-    document.getElementById("playlistsButton").style.display = 'block';
-    document.getElementById("annotationButton").style.display = 'block';
-    document.getElementById("logoutButton").style.display = 'block';
-    document.getElementById("exitPresent").style.display = 'none';
-}
+// function hideButtons() {
+//     // if(document.getElementById("presentSection") == 'block') {
+//     document.getElementById("present").style.display = 'none';
+//     document.getElementById("playlistsButton").style.display = 'none';
+//     document.getElementById("annotationButton").style.display = 'none';
+//     document.getElementById("logoutButton").style.display = 'none';
+//     document.getElementById("exitPresent").style.display = 'block';
+//     // }
+//     // else {
+//     //     document.getElementById("present").style.display = 'block';
+//     //     document.getElementById("playlistsButton").style.display = 'block';
+//     //     document.getElementById("annotationButton").style.display = 'block';
+//     //     document.getElementById("logoutButton").style.display = 'block';
+//     // }
+// }
+
+// function showButtons() {
+//     document.getElementById("present").style.display = 'block';
+//     document.getElementById("playlistsButton").style.display = 'block';
+//     document.getElementById("annotationButton").style.display = 'block';
+//     document.getElementById("logoutButton").style.display = 'block';
+//     document.getElementById("exitPresent").style.display = 'none';
+// }
 
 /**
  * removes everything from storage and logs out
@@ -335,6 +354,22 @@ function addPlaylist(item) {
     node.value = item.id;
     node.innerHTML = item.name + " (" + item.tracks.total + ")";
     document.getElementById("playlists").appendChild(node);
+
+    // let node = document.createElement("tr");
+    //
+    // let th = document.createElement("th");
+    // let playlistName = document.createTextNode(item.name);
+    // playlistName.value = item.id;
+    //
+    // th.appendChild(playlistName);
+    // node.appendChild(th);
+    // node.setAttribute("onclick", "handlePlaylistClick()");
+    // document.getElementById("playlists").appendChild(node);
+}
+
+function handlePlaylistClick() {
+    let clickedPlaylist = event.target;
+    switchPlayerMode(clickedPlaylist.parentElement.value);
 }
 
 /**
@@ -481,16 +516,21 @@ function shuffle() {
 /**
  * plays song from beginning or resumes
  */
-function play() {
+function play(index) {
     let playlist_id = document.getElementById("playlists").value;
-    let trackIndex = document.getElementById("tracks").value;
-
     let body = {};
     body.context_uri = "spotify:playlist:" + playlist_id;
     body.offset = {};
-    body.offset.position = trackIndex;
+    body.offset.position = index;
     body.position_ms = 0;
     callApi("PUT", PLAY + "?device_id=" + web_player_id, JSON.stringify(body), handleApiResponse);
+}
+
+function handleRowTrackClick() {
+    if(clickedRow != "") clickedRow.setAttribute("class", "");
+    clickedRow = event.target;
+    play(clickedRow.parentElement.value);
+    clickedRow.parentElement.setAttribute("class", "active-row");
 }
 
 /**
@@ -498,8 +538,15 @@ function play() {
  */
 function seek(position) {
     let playlist_id = document.getElementById("playlists").value;
-    let trackIndex = document.getElementById("tracks").value;
-
+    let trackIndex;
+    if(trackId == "") {
+        trackIndex = 0;
+    }
+    else {
+        for(let i in currentPlaylistJson) {
+            if(currentPlaylistJson[i][i] == trackId) trackIndex = i;
+        }
+    }
     let body = {};
     body.context_uri = "spotify:playlist:" + playlist_id;
     body.offset = {};
@@ -613,10 +660,26 @@ function handleTracksResponse() {
 }
 
 function addTrack(item, index) {
-    let node = document.createElement("option");
+    let node = document.createElement("tr");
     node.value = index + currentSongsOffset;
     if (item.track != null) {
-        node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")";
+        let td1 = document.createElement("td");
+        let td2 = document.createElement("td");
+        let td3 = document.createElement("td");
+
+        let trackName = document.createTextNode(item.track.name) ;
+        let artist = document.createTextNode(item.track.artists[0].name);
+        let lastPlayed = document.createTextNode("NaN");
+
+        td1.appendChild(trackName);
+        td2.appendChild(artist);
+        td3.appendChild(lastPlayed);
+
+        node.appendChild(td1);
+        node.appendChild(td2);
+        node.appendChild(td3);
+
+        node.setAttribute("onclick", "handleRowTrackClick()");
         node.id = item.track.id;
         document.getElementById("tracks").appendChild(node);
         currentPlaylistJson.push({[node.value]: node.id});
@@ -636,7 +699,7 @@ function handleCurrentlyPlayingResponse() {
             //call analyze
             if(currentWaveformId !== data.item.id) { getTrackAnalysis(data.item.id); }
 
-            //document.getElementById("albumCover").src= data.item.album.images[0].url;
+            document.getElementById("albumCover").src= data.item.album.images[0].url;
             document.getElementById("trackTitle").innerHTML = data.item.name;
             document.getElementById("trackArtist").innerHTML = data.item.artists[0].name;
         }
@@ -883,6 +946,34 @@ function showProgress(){
 }
 
 /**
+ *Get Date
+ *
+ */
+ function getDate(){
+     const date = new Date();
+     let day = date.getDay();
+     let month = date.getMonth()+1;
+     currentDate = month+"/"+day;
+     //console.log(currentDate);
+ }
+
+function storeDate() {
+    getDate();
+
+    //make sure form isnt empty
+    if (currentDate == "") {
+        console.log("No Date")
+        return false
+    }
+
+    let dateData = "?uid=" + userId + "&track=" + trackId + "&date=" + currentDate +"&refresh_token=TESTING"
+
+    //send off to mongodb
+    callApi("GET", INSERTDATE + dateData, null, null)
+
+}
+
+/**
  * Set up the Web Playback SDK
  */
 window.onSpotifyPlayerAPIReady = () => {
@@ -906,6 +997,7 @@ window.onSpotifyPlayerAPIReady = () => {
     });
 
     player.addListener('player_state_changed', ({paused, position, duration, track_window: {current_track}}) => {
+
         progressMs = position;
         clearInterval(playerInterval)
 
@@ -920,8 +1012,10 @@ window.onSpotifyPlayerAPIReady = () => {
             if(currentPlaylistJson[i][i] == trackId) document.getElementById("tracks").value = i;
         }
 
-        //document.getElementById("tracks").value = ;
-
+        if(clickedRow != "") clickedRow.setAttribute("class", "");
+        clickedRow = document.getElementById(trackId);
+        clickedRow.setAttribute("class", "active-row");
+        storeDate();
     });
 
     // Connect to the player!

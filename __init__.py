@@ -50,6 +50,7 @@ def insertAnno():
     track_id = str(request.args.get('track', type=str))
     annotation = str(request.args.get('anno', type=str))
     seconds = str(request.args.get('sec', type=str))
+
     refresh_token = str(request.args.get('refresh_token', type=str))
     #     create json with given data
     #     spotify track id is the id
@@ -79,6 +80,29 @@ def insertAnno():
         updateString = db[spotify_uid].update(query, {"$set": {"annotations": mergedJson}})
         return "New Json: " + str(newJson) + "\n" + "Old Json: " + str(existingResults) + "\n" + "Merged Json: " + str(
             mergedJson)
+
+
+@app.route("/insertDate")
+def insertDate():
+    spotify_uid = str(request.args.get('uid', type=str))
+    track_id = str(request.args.get('track', type=str))
+    date = str(request.args.get('date', type=str))
+
+    refresh_token = str(request.args.get('refresh_token', type=str))
+    #     create json with given data
+    #     spotify track id is the id
+    jsonData = {'_id': track_id, "Date": date}
+    try:
+        db[spotify_uid].insert_one(jsonData)
+        return "done"
+    except:
+        #   define the query (what we are looking for)
+        query = {'_id': track_id}
+        #   create new json with receieved data
+        newJson = {"Date": date}
+        #   get cursor (array) of existing results
+        existingResults = db[spotify_uid].update(query, {"$set": {"Date": date}})
+        return "Date Updated"
 
 
 @app.route('/retrieve')
