@@ -44,7 +44,7 @@ html {
 }
 
 #tracksTable thead {
-    background-color: black;
+    background-color: #4a4a4a;
     color: lightgray;
 }
 
@@ -69,7 +69,7 @@ html {
 }
 
 #tracksTable tbody tr.active-row {
-    color: #009879;
+    color: green;
 }
 
 #buttonArea {
@@ -113,7 +113,7 @@ html {
 
 #waveformDiv{
     position: relative;
-    height: 200px;
+    height: 100px;
 }
 
 #canvasTop {
@@ -169,7 +169,7 @@ html {
 
 #menuToggle a:hover
 {
-    color: tomato;
+    color: green;
 }
 
 
@@ -257,6 +257,7 @@ html {
  */
 #menu
 {
+    box-shadow: 0 0 20px rgb(0 0 0 / 75%);
     position: absolute;
     width: 300px;
     margin: -100px 0 0 -58px;

@@ -189,6 +189,7 @@ function switchPlaylistSelection() {
     //removeAllItems("annotationTrack")
     currentSongsOffset = 0;
     currentPlaylistJson = [];
+    clickedRow = "";
 }
 
 function controlMenu() {
