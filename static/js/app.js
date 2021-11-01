@@ -136,6 +136,7 @@ function switchPresentMode() {
     document.getElementById("annotationSelection").style.display = 'none';
     document.getElementById("playlistSelection").style.display = 'none';
     //show present mode
+    switchAnnotationMode();
     document.getElementById("presentSelection").style.display = 'block';
     document.getElementById("annotationSelection").style.display = 'none';
     document.getElementById("tracks").style.display = 'none';
@@ -143,12 +144,19 @@ function switchPresentMode() {
     document.getElementById("trackArtist").style.display = "block";
     document.getElementById("trackTitle").style.display = "block";
 
-    callApi("GET", USER, null, handleUserIdResponse);
-    setTimeout(fetchAnnotations, 500);
+    // callApi("GET", USER, null, handleUserIdResponse);
+    // setTimeout(fetchAnnotations, 500);
+
+    let currentSongId = "";
 
     clearInterval(annotationInterval);
 
     annotationInterval = setInterval(function() {
+        if(currentSongId != trackId){
+            currentSongId = trackId;
+            document.getElementById("annotationHeader").innerHTML = "";
+            fetchAnnotations();
+        }
         presentAnnotations();
         if(document.getElementById("presentSelection").style.display == 'none')
         {
@@ -156,7 +164,6 @@ function switchPresentMode() {
         }
     }, 1000);
 }
-
 
 /**
  * switches to playlist selection but allow player to keep playing
