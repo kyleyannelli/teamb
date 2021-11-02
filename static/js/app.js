@@ -12,8 +12,9 @@ var waveformTimer = "";
 var progressTimer = "";
 var clickedRow = "";
 var currentDate = "";
-
-var currentPlaylistJson = []
+var currentIndex = 0;
+var currentPlaylistJson = [];
+var currentPlaylistDates = [];
 var currentSongAnnotations = [];
 var currentWaveformId = "";
 var currentTrackLevels = "";
@@ -43,10 +44,11 @@ const TRACKS = "https://api.spotify.com/v1/playlists/{{PlaylistId}}/tracks";
 const ANALYSIS = "https://api.spotify.com/v1/audio-analysis/{id}";
 const CURRENTLYPLAYING = "https://api.spotify.com/v1/me/player/currently-playing";
 const SHUFFLE = "https://api.spotify.com/v1/me/player/shuffle";
-const USER = "https://api.spotify.com/v1/me"
-const INSERT = "https://teamb.dev:2052/insert"
-const INSERTDATE = "https://teamb.dev:2052/insertDate"
-const RETRIEVE = "https://teamb.dev:2052/retrieve"
+const USER = "https://api.spotify.com/v1/me";
+const INSERT = "https://teamb.dev:2052/insert";
+const RETRIEVE = "https://teamb.dev:2052/retrieve";
+const INSERTDATE = "https://teamb.dev:2052/insertDate";
+const RETRIEVEDATES = "https://teamb.dev:2052/retrieveDates";
 const REMOVE = "https://teamb.dev:2052/remove"
 
 function onPageLoad() {
@@ -64,9 +66,11 @@ function onPageLoad() {
             document.getElementById("playlistSelection").style.display = 'block';
             refreshPlaylists();
             currentlyPlaying();
+            callApi("GET", USER, null, handleUserIdResponse);
         }
     }
     refreshRadioButtons();
+    callApi("GET", USER, null, handleUserIdResponse);
     // analyzeWaveform(document.);
 }
 
@@ -85,6 +89,7 @@ function switchPlayerMode() {
     document.getElementById("presentSection").style.display = 'none';
     //auto load tracks. Currently theres also a button. Just make the program auto fetch the tracks ~5-10 seconds. Less ugly and less for user to think about
     fetchTracks();
+    callApi("GET", USER, null, handleUserIdResponse);
 }
 
 /**
@@ -400,8 +405,8 @@ function storeAnnotation() {
         return false
     }
     // Get User
-    let dropdown = document.getElementById("tracks");
-    let trackIndex = dropdown.options[dropdown.selectedIndex].value;
+    //let dropdown = document.getElementById("tracks");
+    let trackIndex = currentIndex; //dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
     if (trackIndex > 100) {
         arrayIndex = trackIndex.charAt(0);
@@ -432,8 +437,8 @@ function removeAnnotation() {
     }
 
     // Get User
-    let dropdown = document.getElementById("tracks");
-    let trackIndex = dropdown.options[dropdown.selectedIndex].value;
+    //let dropdown = document.getElementById("tracks");
+    let trackIndex = currentIndex; //dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
     if (trackIndex > 100) {
         arrayIndex = trackIndex.charAt(0);
@@ -463,8 +468,8 @@ function handleUserIdResponse() {
 
 
 function fetchAnnotations() {
-    let dropdown = document.getElementById("tracks");
-    let trackIndex = dropdown.options[dropdown.selectedIndex].value;
+    //let dropdown = document.getElementById("tracks");
+    let trackIndex =  currentIndex;//dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
     if (trackIndex > 100) {
         arrayIndex = trackIndex.charAt(0);
@@ -528,7 +533,7 @@ function play(index) {
 }
 
 function handleRowTrackClick() {
-    if(clickedRow != "") clickedRow.setAttribute("class", "");
+    if(clickedRow != null && clickedRow != "") clickedRow.setAttribute("class", "");
     clickedRow = event.target;
     play(clickedRow.parentElement.value);
     clickedRow.parentElement.setAttribute("class", "active-row");
@@ -566,11 +571,13 @@ function pause() {
 }
 
 function next() {
+    currentIndex++;
     progressMs = 0;
     callApi("POST", NEXT + "?device_id=" + web_player_id, null, handleApiResponse);
 }
 
 function previous() {
+    if(currentIndex > 0){ currentIndex--;}
     progressMs = 0;
     callApi("POST", PREVIOUS + "?device_id=" + web_player_id, null, handleApiResponse);
 }
@@ -633,14 +640,32 @@ function fetchTracks() {
         let url = TRACKS.replace("{{PlaylistId}}", playlist_id);
         //reset jsonarray here otherwise the previous playlists would still be stored
         jsonArray = []
-        callApi("GET", url, null, handleTracksResponse);
+        callApi("GET", RETRIEVEDATES + "?uid=" + userId, null, handleDatesResponse);
+        setTimeout(function () {
+            callApi("GET", url, null, handleTracksResponse);
+        }, 200);
     }
 
 }
 
+function handleDatesResponse() {
+    if (this.status == 200) {
+        currentPlaylistDates = [];
+        var data = JSON.parse(this.responseText);
+        // console.log(data);
+        removeAllItems("songAnnotations");
+        for (var key in data) {
+            currentPlaylistDates.push({[key]: data[key]});
+        }
+        console.log(currentPlaylistDates);
+    }
+    else{
+        console.log(this.responseText)
+    }
+}
+
 function handleTracksResponse() {
     if (this.status == 200) {
-
         var data = JSON.parse(this.responseText);
         // previousCurrentSongs = currentSongs
         // currentSongs = Object.assign(previousCurrentSongs, data)
@@ -670,7 +695,26 @@ function addTrack(item, index) {
 
         let trackName = document.createTextNode(item.track.name) ;
         let artist = document.createTextNode(item.track.artists[0].name);
-        let lastPlayed = document.createTextNode("NaN");
+        let lastPlayed = document.createTextNode("Never Played");
+        for(let i in currentPlaylistDates) {
+            if(currentPlaylistDates[i][item.track.id] != undefined) {
+                let today = new Date();
+                let oldDate = new Date(currentPlaylistDates[i][item.track.id]);
+                let msInDay = 24 * 60 * 60 * 1000;
+                today.setHours(0,0,0,0);
+                oldDate.setHours(0,0,0,0)
+                let diff = (+today - +oldDate)/msInDay
+                if(diff == 0) {
+                    lastPlayed = document.createTextNode("today");
+                }
+                else if(diff == 1) {
+                    lastPlayed = document.createTextNode(diff + " day ago");
+                }
+                else {
+                    lastPlayed = document.createTextNode(diff + " days ago");
+                }
+            }
+        }
 
         td1.appendChild(trackName);
         td2.appendChild(artist);
@@ -954,7 +998,8 @@ function showProgress(){
      const date = new Date();
      let day = date.getDay();
      let month = date.getMonth()+1;
-     currentDate = month+"/"+day;
+     let year = date.getFullYear();
+     currentDate = month+"/"+day+"/"+year;
      //console.log(currentDate);
  }
 
@@ -1016,10 +1061,18 @@ window.onSpotifyPlayerAPIReady = () => {
             if(currentPlaylistJson[i][i] == trackId) document.getElementById("tracks").value = i;
         }
 
-        if(clickedRow != "") clickedRow.setAttribute("class", "");
-        clickedRow = document.getElementById(trackId);
-        clickedRow.setAttribute("class", "active-row");
+        if(clickedRow != null) {
+            if(clickedRow != "") {
+                clickedRow.setAttribute("class", "");
+            }
+
+            clickedRow = document.getElementById(trackId);
+            clickedRow.setAttribute("class", "active-row");
+            currentIndex = clickedRow.parentElement.value;
+        }
+
         storeDate();
+        fetchAnnotations();
     });
 
     // Connect to the player!

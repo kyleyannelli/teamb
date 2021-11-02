@@ -91,17 +91,24 @@ def insertDate():
     refresh_token = str(request.args.get('refresh_token', type=str))
     #     create json with given data
     #     spotify track id is the id
-    jsonData = {'_id': track_id, "Date": date}
+    jsonData = {'_id': "datesCollection", "dates" : {track_id: date}}
     try:
         db[spotify_uid].insert_one(jsonData)
         return "done"
     except:
         #   define the query (what we are looking for)
-        query = {'_id': track_id}
+        query = {'_id': "datesCollection"}
         #   create new json with receieved data
-        newJson = {"Date": date}
+        newJson = {track_id: date}
         #   get cursor (array) of existing results
-        existingResults = db[spotify_uid].update(query, {"$set": {"Date": date}})
+        existingResults = db[spotify_uid].find(query)[0]["dates"]
+        if (track_id in existingResults) != 0:
+            editDate(spotify_uid, track_id, date, existingResults)
+            return "updated existing date."
+        # from the first result merge the existing annotations and the new one
+        mergedJson = merge(newJson, existingResults)
+        #   now we overwrite the annotations object in the document with our merged json
+        updateString = db[spotify_uid].update(query, {"$set": {"dates": mergedJson}})
         return "Date Updated"
 
 
@@ -118,8 +125,25 @@ def retrieve():
             return jsonify({"0": "You have no annotations for this song!"})
     except IndexError as e:
         return jsonify({"0": "You have no annotations for this song!"})
+    except KeyError as e:
+        return jsonify({"0": "You have no annotations for this song!"})
     return result
 
+@app.route('/retrieveDates')
+def retrieveDates():
+    spotify_uid = str(request.args.get('uid', type=str))
+    #   define the query (what we are looking for)
+    query = {'_id': "datesCollection"}
+    result = ""
+    try:
+        result = db[spotify_uid].find(query)[0]["dates"]
+        if result == {}:
+            return jsonify({"0": "Never Played"})
+    except IndexError as e:
+        return jsonify({"0": "Never Played"})
+    except KeyError as e:
+        return jsonify({"0": "Never Played"})
+    return result
 
 @app.route('/remove')
 def remove():
@@ -158,6 +182,16 @@ def edit(spt_uid, tk_id, anno, sec, existingResults):
     mergedJson = merge(newJson, existingResults)
     #   now we overwrite the annotations object in the document with our merged json
     db[spt_uid].update(query, {"$set": {"annotations": mergedJson}})
+
+def editDate(spt_uid, tk_id, date, existingResults):
+    #   define the query (what we are looking for)
+    query = {'_id': "datesCollection"}
+    #   create new json with receieved data
+    del existingResults[tk_id]
+    newJson = {tk_id: date}
+    mergedJson = merge(newJson, existingResults)
+    #   now we overwrite the annotations object in the document with our merged json
+    db[spt_uid].update(query, {"$set": {"dates": mergedJson}})
 
 
 # DON'T CHANGE
