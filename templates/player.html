@@ -54,13 +54,18 @@
         <!--
             PRESENT SECTION
         -->
-        <div id="presentSection">
-            <text id="currentAnnotation">NONE CURRENT</text><text id="nextAnnotation">NONE NEXT</text>
+        <div id="presentSection" style="height: 0px; visibility: hidden;">
+            <div id="currentAnnotationDiv">
+                <text id="currentAnnotation"></text>
+            </div>
+            <div id="nextAnnotationDiv">
+                <text id="nextAnnotation"></text>
+            </div>
         </div>
         <!--
            ANNOTATION EDITOR SECTION
        -->
-        <div id="annotationSection">
+        <div id="annotationSection" style="height: 0px; visibility: hidden;">
             <div>
                 <label for="annotationText"></label>
                 <input type="text" id="annotationText" style="background-color: #d3d3d3" name="annotationText"
@@ -93,11 +98,11 @@
     </div>
 
     <div id="buttonArea">
-        <i class="fa fa-random" style="font-size:36px;float:left;" onclick="shuffle()"></i>
-        <i class="fa fa-backward" style="font-size:36px;" onclick="previous()"></i>
-        <i id="pausePlay" class="fa fa-pause-circle-o" style="font-size:36px;" onclick="pause()"></i>
-        <i id="playPause" class="fa fa-play-circle-o" style="font-size:36px;" onclick="handleResume()"></i>
-        <i class="fa fa-forward" style="font-size:36px;" onclick="next()"></i>
+        <i class="fa fa-random" style="font-size:25px;position:absolute;left:5px;margin-top: 20px;" onclick="shuffle()"></i>
+        <i class="fa fa-backward" style="font-size:25px;margin-right:25px;vertical-align: super;" onclick="previous()"></i>
+        <i id="pausePlay" class="fa fa-pause-circle-o" style="font-size:50px;display:none;" onclick="pause()"></i>
+        <i id="playPause" class="fa fa-play-circle-o" style="font-size:50px;" onclick="handleResume()"></i>
+        <i class="fa fa-forward" style="font-size:25px;margin-left: 25px;vertical-align: super;" onclick="next()"></i>
     </div>
     <div id="trackDiv">
         <table id="tracksTable" class="prettyTable">

@@ -6,11 +6,16 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type= "text/css" href="{{ url_for('static', filename='css/login.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </head>
 <body>
 <container>
     <p id="loginButton" class="grow" onclick="requestAuthorization()">Login</p>
 </container>
+
+<div style="position: absolute; bottom: 210px; margin-left: 49%;">
+    <i class="fa fa-github" style="font-size: 50px;color: white;"><a href="https://github.com/kyleyannelli/teamb"></a></i>
+</div>
 </body>
 </html>

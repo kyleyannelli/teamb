@@ -1,5 +1,6 @@
 html {
     background-color: #333333;
+    overflow-x: hidden;
 }
 
 .shrink {
@@ -149,6 +150,9 @@ html {
     margin-bottom: 10px;
     height:200px;
     width:200px;
+}
+
+#albumCover {
     box-shadow: 0 0 20px rgb(0 0 0 / 75%);
 }
 
@@ -208,7 +212,7 @@ html {
 
 #buttonArea {
     text-align: center;
-    margin-top: 10px;
+    margin-top: 15px;
     color: #d3d3d3;
     margin-bottom: 25px;
 }
@@ -277,12 +281,28 @@ html {
 
 #presentSection {
     visibility: hidden;
+    display: flex;
     text-align: center;
-    height: 100px;
+    height: 0px;
+    font-size: 50px;
+    overflow: hidden;
     transition: visibility 0s, height 0.66s ease-out;
+    margin-bottom: 50px;
+    align-items: center;
+    justify-content: center;
 }
 
+#currentAnnotationDiv {
+    width: 800px;
+    word-break: break-word;
+}
 
+#nextAnnotation {
+    right: 15px;
+    opacity: 50%;
+    position: absolute;
+    font-size: 30px;
+}
 
 #exitPresent {
     display: none;
@@ -290,6 +310,10 @@ html {
 
 #annotationSection {
     text-align: center;
+    visibility: hidden;
+    height: 0px;
+    overflow: hidden;
+    transition: visibility 0s, height 0.66s ease-out;
 }
 
 #timeStamps {

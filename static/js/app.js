@@ -22,6 +22,7 @@ var currentTrackLevels = "";
 var jsonArray = [];
 var web_player_id = "";
 var currentSongsOffset = 0;
+var isPaused = true;
 var access_token = null;
 var refresh_token = null;
 var currentPlaylist = "";
@@ -82,7 +83,6 @@ function switchPlayerMode() {
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
     //hide annotation editor
-    document.getElementById("annotationSection").style.display = 'none';
     //show player stuff
     document.getElementById("playerSection").style.display = 'block';
     document.body.style.backgroundImage = 'none';
@@ -103,16 +103,20 @@ function switchAnnotationMode() {
     // document.getElementById("annotationSection").style.display = 'block';
     //removeAllItems("annotationTrack")
     //transferTracks();
-    if(document.getElementById("annotationSection").style.display == 'none')
+    if(document.getElementById("annotationSection").style.visibility == 'hidden')
     {
-        document.getElementById("annotationSection").style.display = 'block';
+        document.getElementById("annotationSection").style.visibility = 'visible';
+        document.getElementById("annotationSection").style.height = "200px";
+        document.getElementById("trackInfo").setAttribute("class", "shrink");
+        setTimeout(wait, 500);
         //document.getElementById("trackArtist").style.display = "none";
         //document.getElementById("trackTitle").style.display = "none";
     }
     else {
-        document.getElementById("annotationSection").style.display = 'none';
-        document.getElementById("trackArtist").style.display = "block";
-        document.getElementById("trackTitle").style.display = "block";
+        document.getElementById("annotationSection").style.height = "0";
+        document.getElementById("annotationSection").style.visibility = 'hidden';
+        document.getElementById("trackInfo").setAttribute("class", "grow");
+        setTimeout(wait, 500);
     }
     setTimeout(fetchAnnotations, 500);
 }
@@ -147,11 +151,11 @@ function presentAnnotations() {
     for (let i = 0; i < currentSongAnnotations.length; i++) {
 
         let annotation = currentSongAnnotations[i];
-        let splitIndex = annotation.lastIndexOf(":")
+        let splitIndex = annotation.lastIndexOf(":");
         let anno = annotation.substring(0, splitIndex);
         let ms = annotation.substring(splitIndex + 1, annotation.length);
 
-        if ((progressMs < ms) && (ms - 30000 <= progressMs)) {
+        if ((progressMs < ms) && (ms - 5000 <= progressMs)) {
 
 
             let time = Math.round(ms / 1000);
@@ -161,7 +165,7 @@ function presentAnnotations() {
             // document.getElementById("duration").innerHTML = minutesDur + ":" + secDur.padStart(2,'0');
 
 
-            document.getElementById("currentAnnotation").innerHTML = anno + " at " + minutes + ":" + sec.padStart(2, '0');
+            document.getElementById("currentAnnotation").innerHTML = anno;
 
             if(currentSongAnnotations[i + 1] != null) {
                 let nextAnnotation = currentSongAnnotations[i + 1];
@@ -173,7 +177,7 @@ function presentAnnotations() {
                 let nMinutes = Math.floor(nTime / 60);
                 let nSec = nTime - nMinutes * 60 + '';
 
-                document.getElementById("nextAnnotation").innerHTML = nextAnno + " at " + nMinutes + ":" + nSec.padStart(2, '0');
+                document.getElementById("nextAnnotation").innerHTML = nextAnno.substring(0, 10) + "..";
             }
             else {
                 document.getElementById("nextAnnotation").innerHTML = "";
@@ -192,8 +196,8 @@ function switchPresentMode() {
     // setTimeout(fetchAnnotations, 500);
     if(document.getElementById("presentSection").style.visibility == 'hidden')
     {
-        document.getElementById("annotationSection").style.display = 'none';
         document.getElementById("presentSection").style.visibility = 'visible';
+        document.getElementById("presentSection").style.height = "100px";
 
         document.getElementById("trackInfo").setAttribute("class", "shrink");
         //document.getElementById("trackArtist").style.display = "none";
@@ -201,6 +205,7 @@ function switchPresentMode() {
         setTimeout(wait, 500);
     }
     else {
+        document.getElementById("presentSection").style.height = "0px";
         document.getElementById("presentSection").style.visibility = 'hidden'
         document.getElementById("trackInfo").setAttribute("class", "grow");
         setTimeout(wait, 500);
@@ -216,8 +221,6 @@ function switchPresentMode() {
     annotationInterval = setInterval(function() {
         if(currentSongId != trackId){
             currentSongId = trackId;
-            document.getElementById("currentAnnotation").innerHTML = "test";
-            document.getElementById("nextAnnotation").innerHTML = "test2";
             fetchAnnotations();
         }
         presentAnnotations();
@@ -235,7 +238,6 @@ function switchPlaylistSelection() {
     //hide player stuff
     document.getElementById("playerSection").style.display = 'none';
     //hide annotation stuff
-    document.getElementById("annotationSection").style.display = 'none';
     //show playlist selection
     document.getElementById("playlistSelection").style.display = 'block';
     document.body.style.backgroundImage = 'none';
@@ -315,6 +317,7 @@ function requestAuthorization() {
     url += "&redirect_uri=" + encodeURI(redirect_uri);
     url += "&show_dialog=true";
     url += "&scope=user-read-private user-read-email user-modify-playback-state user-read-playback-position user-library-read streaming user-read-playback-state user-read-recently-played playlist-read-private";
+    console.log(url);
     window.location.href = url; // Show Spotify's authorization screen
 }
 
@@ -327,13 +330,6 @@ function fetchAccessToken(code) {
     callAuthorizationApi(body);
 }
 
-function refreshAccessToken() {
-    refresh_token = localStorage.getItem("refresh_token");
-    let body = "grant_type=refresh_token";
-    body += "&refresh_token=" + refresh_token;
-    body += "&client_id=" + client_id;
-    callAuthorizationApi(body);
-}
 
 function callAuthorizationApi(body) {
     let xhr = new XMLHttpRequest();
@@ -363,6 +359,17 @@ function handleAuthorizationResponse() {
         //alert(this.responseText);
     }
 }
+
+function refreshAccessToken() {
+    refresh_token = localStorage.getItem("refresh_token");
+    let body = "grant_type=refresh_token";
+    body += "&refresh_token=" + refresh_token;
+    body += "&client_id=" + client_id;
+    callAuthorizationApi(body);
+}
+
+
+
 
 /**
  * helper function for GET, POST, PUT, and DELETE calls
@@ -584,26 +591,25 @@ function handleRowTrackClick() {
     if(clickedRow != null && clickedRow != "") clickedRow.setAttribute("class", "");
     clickedRow = event.target;
     play(clickedRow.parentElement.value);
-    clickedRow.parentElement.setAttribute("class", "active-row");
 }
 
 /**
  * plays song from specified time position
  */
 function seek(position) {
-    let trackIndex;
-    if(trackId == "") {
-        trackIndex = 0;
-    }
-    else {
-        for(let i in currentPlaylistJson) {
-            if(currentPlaylistJson[i][i] == trackId) trackIndex = i;
-        }
-    }
+    // let trackIndex;
+    // if(trackId == "") {
+    //     trackIndex = 0;
+    // }
+    // else {
+    //     for(let i in currentPlaylistJson) {
+    //         if(currentPlaylistJson[i][i] == trackId) trackIndex = i;
+    //     }
+    // }
     let body = {};
     body.context_uri = "spotify:playlist:" + playlistId;
     body.offset = {};
-    body.offset.position = trackIndex;
+    body.offset.position = currentIndex;
     body.position_ms = position;
     callApi("PUT", PLAY + "?device_id=" + web_player_id, JSON.stringify(body), handleApiResponse);
 }
@@ -618,13 +624,11 @@ function pause() {
 }
 
 function next() {
-    currentIndex++;
     progressMs = 0;
     callApi("POST", NEXT + "?device_id=" + web_player_id, null, handleApiResponse);
 }
 
 function previous() {
-    if(currentIndex > 0){ currentIndex--;}
     progressMs = 0;
     callApi("POST", PREVIOUS + "?device_id=" + web_player_id, null, handleApiResponse);
 }
@@ -790,7 +794,6 @@ function handleCurrentlyPlayingResponse() {
         if (data.item != null && document.getElementById("playlistSelection").style.display != "block") {
             //call analyze
             if(currentWaveformId !== data.item.id) { getTrackAnalysis(data.item.id); }
-
             document.getElementById("albumCover").src= data.item.album.images[0].url;
             document.getElementById("albumCover").setAttribute("class", "fadeIn");
             document.getElementById("trackTitle").innerHTML = data.item.name;
@@ -1092,9 +1095,20 @@ window.onSpotifyPlayerAPIReady = () => {
     });
 
     player.addListener('player_state_changed', ({paused, position, duration, track_window: {current_track}}) => {
-
+        for(let i in currentPlaylistJson) {
+            if(currentPlaylistJson[i][i] == trackId) currentIndex = i;
+        }
         progressMs = position;
         clearInterval(playerInterval)
+        isPaused = paused;
+        if(isPaused){
+            document.getElementById("playPause").style.display = 'contents';
+            document.getElementById("pausePlay").style.display = 'none';
+        }
+        else {
+            document.getElementById("pausePlay").style.display = 'contents';
+            document.getElementById("playPause").style.display = 'none';
+        }
 
         playerInterval = setInterval(function() {
             progressMs += paused ? 0 : 1000;
@@ -1105,14 +1119,18 @@ window.onSpotifyPlayerAPIReady = () => {
         currentlyPlaying();
         for(let i in currentPlaylistJson) {
             if(currentPlaylistJson[i][i] == trackId) document.getElementById("tracks").value = i;
+            if(currentPlaylistJson[i][i] == current_track.linked_from.id) document.getElementById("tracks").value = i;
         }
 
         if(clickedRow != null) {
             if(clickedRow != "") {
                 clickedRow.setAttribute("class", "");
             }
-
             clickedRow = document.getElementById(trackId);
+            if(clickedRow == null) {
+                clickedRow = document.getElementById(current_track.linked_from.id);
+                trackId = current_track.linked_from.id;
+            }
             clickedRow.setAttribute("class", "active-row");
             currentIndex = clickedRow.parentElement.value;
         }
