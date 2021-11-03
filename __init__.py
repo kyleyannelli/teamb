@@ -1,12 +1,14 @@
+import base64
 import os
 
-from flask import Flask
+from flask import Flask, redirect
 from flask import render_template
 from flask import request
 from flask import jsonify
 from pymongo import MongoClient
 from random import randint
 from jsonmerge import merge
+import requests
 import random
 # KEEP ALL SSL, NEEDED HTTPS FOR WEB PLAYER
 import ssl
@@ -43,6 +45,50 @@ def sendSecret():
         return jsonify(message)
     return "hey."
 
+@app.route("/authorization", methods=["GET", "POST"])
+def getAuthorization():
+    #url = ""
+    client_id = "c6f5c006684341518ba23d7bae85b169"
+    client_secret = "daab896cb43846d995865e9d40296b01"
+    code = str(request.args.get('code', type=str))
+    # if request.method == "POST":
+    #     url = "https://accounts.spotify.com/authorize"
+    #     url += "?client_id=" + client_id
+    #     url += "&response_type=code"
+    #     url += "&redirect_uri=http://127.0.0.1:5000/player"#add redirect URL
+    #     url += "&show_dialog=true"
+    #     url += "&scope=user-read-private%20user-read-email%20user-modify-playback-state%20user-read-playback-position%20user-library-read%20streaming%20user-read-playback-state%20user-read-recently-played%20playlist-read-private"
+    #     print(url)
+    #
+    # redirect(url)
+
+    # body = "grant_type=authorization_code"
+    # body += "&code=" + code
+    # body += "&redirect_uri=http://teamb.dev:2052/player"#add redirect URL
+    # body += "&client_id=" + client_id
+    # body += "&client_secret=" + client_secret
+    auth_header = base64.urlsafe_b64encode((client_id + ':' + client_secret).encode('ascii'))
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic %s' % auth_header.decode('ascii')
+    }
+    payload = {
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': 'https://teamb.dev:2052/player',
+        'client_id': client_id,
+        'client_secret': client_secret,
+    }
+
+    # Make a request to the /token endpoint to get an access token
+    access_token_request = requests.post("https://accounts.spotify.com/api/token", data=payload, headers=headers)
+
+    # convert the response to JSON
+    access_token_response_data = access_token_request.json()
+
+    return access_token_response_data
+    # Data = requests.post("https://accounts.spotify.com/api/token", data=payload, headers=headers)
+    # return str(Data)
 
 @app.route('/insert')
 def insertAnno():

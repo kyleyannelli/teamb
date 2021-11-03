@@ -1,7 +1,6 @@
 var redirect_uri = "https://teamb.dev:2052/player";
 
 var client_id = "";
-var client_secret = "";
 var playlistId = "";
 var waveformTop = true;
 //interval ids
@@ -52,10 +51,10 @@ const RETRIEVE = "https://teamb.dev:2052/retrieve";
 const INSERTDATE = "https://teamb.dev:2052/insertDate";
 const RETRIEVEDATES = "https://teamb.dev:2052/retrieveDates";
 const REMOVE = "https://teamb.dev:2052/remove"
+const AUTHORIZETEAMB = "https://teamb.dev:2052/authorization"
 
 function onPageLoad() {
     client_id = localStorage.getItem("client_id");
-    client_secret = localStorage.getItem("client_secret");
     if (window.location.search.length > 0) {
         handleRedirect();
     } else {
@@ -68,11 +67,9 @@ function onPageLoad() {
             document.getElementById("playlistSelection").style.display = 'block';
             refreshPlaylists();
             currentlyPlaying();
-            callApi("GET", USER, null, handleUserIdResponse);
         }
     }
     refreshRadioButtons();
-    callApi("GET", USER, null, handleUserIdResponse);
     // analyzeWaveform(document.);
 }
 
@@ -80,6 +77,7 @@ function onPageLoad() {
  * switches into player mode
  */
 function switchPlayerMode() {
+    setTimeout(function() { wait() }, 400);
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
     //hide annotation editor
@@ -307,9 +305,7 @@ function getCode() {
 
 function requestAuthorization() {
     client_id = "c6f5c006684341518ba23d7bae85b169";
-    client_secret = "daab896cb43846d995865e9d40296b01";
     localStorage.setItem("client_id", client_id);
-    localStorage.setItem("client_secret", client_secret); // In a real app you should not expose your client_secret to the user
 
     let url = AUTHORIZE;
     url += "?client_id=" + client_id;
@@ -317,33 +313,16 @@ function requestAuthorization() {
     url += "&redirect_uri=" + encodeURI(redirect_uri);
     url += "&show_dialog=true";
     url += "&scope=user-read-private user-read-email user-modify-playback-state user-read-playback-position user-library-read streaming user-read-playback-state user-read-recently-played playlist-read-private";
-    console.log(url);
     window.location.href = url; // Show Spotify's authorization screen
 }
 
 function fetchAccessToken(code) {
-    let body = "grant_type=authorization_code";
-    body += "&code=" + code;
-    body += "&redirect_uri=" + encodeURI(redirect_uri);
-    body += "&client_id=" + client_id;
-    body += "&client_secret=" + client_secret;
-    callAuthorizationApi(body);
-}
-
-
-function callAuthorizationApi(body) {
-    let xhr = new XMLHttpRequest();
-    xhr.open("POST", TOKEN, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.setRequestHeader('Authorization', 'Basic ' + btoa(client_id + ":" + client_secret));
-    xhr.send(body);
-    xhr.onload = handleAuthorizationResponse;
+    callApi("POST", AUTHORIZETEAMB + "?code=" +code, null, handleAuthorizationResponse)
 }
 
 function handleAuthorizationResponse() {
     if (this.status == 200) {
         var data = JSON.parse(this.responseText);
-        // console.log(data);
         var data = JSON.parse(this.responseText);
         if (data.access_token != undefined) {
             access_token = data.access_token;
@@ -367,7 +346,6 @@ function refreshAccessToken() {
     body += "&client_id=" + client_id;
     callAuthorizationApi(body);
 }
-
 
 
 
@@ -430,7 +408,7 @@ function addPlaylist(item) {
 
 function handlePlaylistClick() {
     playlistId = event.target.parentElement.value;
-    console.log(playlistId);
+    //console.log(playlistId);
     // console.log(playlistId.value);
     switchPlayerMode();
 }
@@ -455,7 +433,7 @@ function storeAnnotation() {
     let MMSS = String(document.getElementById("annotationTime").value)
     let MMSSArray = MMSS.split(':');
     let milliseconds = (MMSSArray[0] * 60000) + (MMSSArray[1] * 1000);
-    console.log(milliseconds);
+    //console.log(milliseconds);
     //make sure form isnt empty
     if (annotation == '' || MMSS == '') {
         alert("Please enter both the annotation and timestamp.")
@@ -708,7 +686,7 @@ function handleDatesResponse() {
         for (var key in data) {
             currentPlaylistDates.push({[key]: data[key]});
         }
-        console.log(currentPlaylistDates);
+        //console.log(currentPlaylistDates);
     }
     else{
         console.log(this.responseText)
@@ -1059,7 +1037,7 @@ function storeDate() {
 
     //make sure form isnt empty
     if (currentDate == "") {
-        console.log("No Date")
+        //console.log("No Date")
         return false
     }
 
@@ -1092,6 +1070,7 @@ window.onSpotifyPlayerAPIReady = () => {
     player.on('ready', data => {
         console.log('Ready with Device ID', data.device_id);
         web_player_id = data.device_id;
+        callApi("GET", USER, null, handleUserIdResponse);
     });
 
     player.addListener('player_state_changed', ({paused, position, duration, track_window: {current_track}}) => {
