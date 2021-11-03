@@ -734,13 +734,13 @@ function addTrack(item, index) {
                 oldDate.setHours(0,0,0,0)
                 let diff = (+today - +oldDate)/msInDay
                 if(diff == 0) {
-                    lastPlayed = document.createTextNode("today");
+                    lastPlayed = document.createTextNode("Today");
                 }
                 else if(diff == 1) {
-                    lastPlayed = document.createTextNode(diff + " day ago");
+                    lastPlayed = document.createTextNode(diff + " Day Ago");
                 }
                 else {
-                    lastPlayed = document.createTextNode(diff + " days ago");
+                    lastPlayed = document.createTextNode(diff + " Days Ago");
                 }
             }
         }
