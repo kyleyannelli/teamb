@@ -2,6 +2,7 @@ var redirect_uri = "https://teamb.dev:2052/player";
 
 var client_id = "";
 var client_secret = "";
+var playlistId = "";
 var waveformTop = true;
 //interval ids
 var intervalId = "";
@@ -86,7 +87,7 @@ function switchPlayerMode() {
     document.getElementById("playerSection").style.display = 'block';
     document.body.style.backgroundImage = 'none';
     //hide present
-    document.getElementById("presentSection").style.display = 'none';
+    //document.getElementById("presentSection").style.display = 'none';
     //auto load tracks. Currently theres also a button. Just make the program auto fetch the tracks ~5-10 seconds. Less ugly and less for user to think about
     fetchTracks();
     callApi("GET", USER, null, handleUserIdResponse);
@@ -118,30 +119,70 @@ function switchAnnotationMode() {
 
 function presentAnnotations() {
     //console.log("in presentAnnotation")
-    currentSongAnnotations.forEach(annotation => {
+    // currentSongAnnotations.forEach(annotation => {
+    //     let splitIndex = annotation.lastIndexOf(":")
+    //     //console.log(splitIndex);
+    //     let anno = annotation.substring(0, splitIndex);
+    //     //console.log(anno);
+    //     let ms = annotation.substring(splitIndex + 1, annotation.length);
+    //     //console.log(ms);
+    //     //console.log("X :" + x);
+    //     //console.log("In for each: " + x[0]);
+    //     //  if(progressMs < x[1]) {
+    //     //      if(x[1]-5000 <= progressMs) {
+    //     //          console.log("x[1]-5000 <= progressMs")
+    //     //      }
+    //     //  }
+    //     if((progressMs < ms) && (ms-5000 <= progressMs)) {
+    //         //console.log(x[0]);
+    //         let time = Math.round(ms / 1000);
+    //         let minutes = Math.floor(time / 60);
+    //         let sec = time - minutes * 60 +'';
+    //
+    //         // document.getElementById("duration").innerHTML = minutesDur + ":" + secDur.padStart(2,'0');
+    //         document.getElementById("annotationHeader").innerHTML = anno + " at " + minutes + ":" + sec.padStart(2,'0');
+    //     }
+    // })
+
+    for (let i = 0; i < currentSongAnnotations.length; i++) {
+
+        let annotation = currentSongAnnotations[i];
         let splitIndex = annotation.lastIndexOf(":")
-        //console.log(splitIndex);
         let anno = annotation.substring(0, splitIndex);
-        //console.log(anno);
         let ms = annotation.substring(splitIndex + 1, annotation.length);
-        //console.log(ms);
-        //console.log("X :" + x);
-        //console.log("In for each: " + x[0]);
-        //  if(progressMs < x[1]) {
-        //      if(x[1]-5000 <= progressMs) {
-        //          console.log("x[1]-5000 <= progressMs")
-        //      }
-        //  }
-        if((progressMs < ms) && (ms-5000 <= progressMs)) {
-            //console.log(x[0]);
+
+        if ((progressMs < ms) && (ms - 30000 <= progressMs)) {
+
+
             let time = Math.round(ms / 1000);
             let minutes = Math.floor(time / 60);
-            let sec = time - minutes * 60 +'';
+            let sec = time - minutes * 60 + '';
 
             // document.getElementById("duration").innerHTML = minutesDur + ":" + secDur.padStart(2,'0');
-            document.getElementById("annotationHeader").innerHTML = anno + " at " + minutes + ":" + sec.padStart(2,'0');
+
+
+            document.getElementById("currentAnnotation").innerHTML = anno + " at " + minutes + ":" + sec.padStart(2, '0');
+
+            if(currentSongAnnotations[i + 1] != null) {
+                let nextAnnotation = currentSongAnnotations[i + 1];
+                let nSplitIndex = nextAnnotation.lastIndexOf(":")
+                let nextAnno = nextAnnotation.substring(0, nSplitIndex);
+                let nextMs = nextAnnotation.substring(nSplitIndex + 1, nextAnnotation.length);
+
+                let nTime = Math.round(nextMs / 1000);
+                let nMinutes = Math.floor(nTime / 60);
+                let nSec = nTime - nMinutes * 60 + '';
+
+                document.getElementById("nextAnnotation").innerHTML = nextAnno + " at " + nMinutes + ":" + nSec.padStart(2, '0');
+            }
+            else {
+                document.getElementById("nextAnnotation").innerHTML = "";
+            }
         }
-    })
+    }
+}
+function wait() {
+
 }
 
 function switchPresentMode() {
@@ -149,14 +190,22 @@ function switchPresentMode() {
     //document.getElementById("playerSection").style.display = 'none';
     //hide playlist selection
     // setTimeout(fetchAnnotations, 500);
-    document.getElementById("annotationSection").style.display = 'none';
-    document.getElementById("playlistSelection").style.display = 'none';
-    //show present mode
-    document.getElementById("presentSection").style.display = 'block';
-    document.getElementById("annotationSection").style.display = 'none';
-    //hideButtons();
-    document.getElementById("trackArtist").style.display = "block";
-    document.getElementById("trackTitle").style.display = "block";
+    if(document.getElementById("presentSection").style.visibility == 'hidden')
+    {
+        document.getElementById("annotationSection").style.display = 'none';
+        document.getElementById("presentSection").style.visibility = 'visible';
+
+        document.getElementById("trackInfo").setAttribute("class", "shrink");
+        //document.getElementById("trackArtist").style.display = "none";
+        //document.getElementById("trackTitle").style.display = "none";
+        setTimeout(wait, 500);
+    }
+    else {
+        document.getElementById("presentSection").style.visibility = 'hidden'
+        document.getElementById("trackInfo").setAttribute("class", "grow");
+        setTimeout(wait, 500);
+        //document.getElementById("trackInfo").style.transform = "scale(1)";
+    }
 
     setTimeout(fetchAnnotations, 500);
 
@@ -167,7 +216,8 @@ function switchPresentMode() {
     annotationInterval = setInterval(function() {
         if(currentSongId != trackId){
             currentSongId = trackId;
-            document.getElementById("annotationHeader").innerHTML = "";
+            document.getElementById("currentAnnotation").innerHTML = "test";
+            document.getElementById("nextAnnotation").innerHTML = "test2";
             fetchAnnotations();
         }
         presentAnnotations();
@@ -354,26 +404,28 @@ function switchIcon() {
 }
 
 function addPlaylist(item) {
-    let node = document.createElement("option");
-    node.value = item.id;
-    node.innerHTML = item.name + " (" + item.tracks.total + ")";
-    document.getElementById("playlists").appendChild(node);
-
-    // let node = document.createElement("tr");
-    //
-    // let th = document.createElement("th");
-    // let playlistName = document.createTextNode(item.name);
-    // playlistName.value = item.id;
-    //
-    // th.appendChild(playlistName);
-    // node.appendChild(th);
-    // node.setAttribute("onclick", "handlePlaylistClick()");
+    // let node = document.createElement("option");
+    // node.value = item.id;
+    // node.innerHTML = item.name + " (" + item.tracks.total + ")";
     // document.getElementById("playlists").appendChild(node);
+
+    let node = document.createElement("tr");
+
+    let th = document.createElement("th");
+    let playlistName = document.createTextNode(item.name);
+    node.value = item.id;
+
+    th.appendChild(playlistName);
+    node.appendChild(th);
+    node.setAttribute("onclick", "handlePlaylistClick()");
+    document.getElementById("playlists").appendChild(node);
 }
 
 function handlePlaylistClick() {
-    let clickedPlaylist = event.target;
-    switchPlayerMode(clickedPlaylist.parentElement.value);
+    playlistId = event.target.parentElement.value;
+    console.log(playlistId);
+    // console.log(playlistId.value);
+    switchPlayerMode();
 }
 
 /**
@@ -514,16 +566,14 @@ function addTrackAnnotation(item, index) {
 
 function shuffle() {
     callApi("PUT", SHUFFLE + "?state=true&device_id=" + web_player_id, null, handleApiResponse);
-    play();
 }
 
 /**
  * plays song from beginning or resumes
  */
 function play(index) {
-    let playlist_id = document.getElementById("playlists").value;
     let body = {};
-    body.context_uri = "spotify:playlist:" + playlist_id;
+    body.context_uri = "spotify:playlist:" + playlistId;
     body.offset = {};
     body.offset.position = index;
     body.position_ms = 0;
@@ -541,7 +591,6 @@ function handleRowTrackClick() {
  * plays song from specified time position
  */
 function seek(position) {
-    let playlist_id = document.getElementById("playlists").value;
     let trackIndex;
     if(trackId == "") {
         trackIndex = 0;
@@ -552,7 +601,7 @@ function seek(position) {
         }
     }
     let body = {};
-    body.context_uri = "spotify:playlist:" + playlist_id;
+    body.context_uri = "spotify:playlist:" + playlistId;
     body.offset = {};
     body.offset.position = trackIndex;
     body.position_ms = position;
@@ -630,12 +679,12 @@ function setAnnotationFields() {
 function fetchTracks() {
     currentSongsOffset = 0;
     removeAllItems("tracks");
-    let playlist_id = document.getElementById("playlists").value;
-    let playlist = document.getElementById("playlists");
-    let playlist_size = playlist.options[playlist.selectedIndex].innerText.split("(")[1];
-    playlist_size = playlist_size.substring(0, playlist_size.length - 1);
-    if (playlist_id.length > 0) {
-        let url = TRACKS.replace("{{PlaylistId}}", playlist_id);
+    // let playlist_id = document.getElementById("playlists").value;
+    // let playlist = document.getElementById("playlists");
+    // let playlist_size = playlist.options[playlist.selectedIndex].innerText.split("(")[1];
+    // playlist_size = playlist_size.substring(0, playlist_size.length - 1);
+    if (playlistId.length > 0) {
+        let url = TRACKS.replace("{{PlaylistId}}", playlistId);
         //reset jsonarray here otherwise the previous playlists would still be stored
         jsonArray = []
         callApi("GET", RETRIEVEDATES + "?uid=" + userId, null, handleDatesResponse);
@@ -743,6 +792,7 @@ function handleCurrentlyPlayingResponse() {
             if(currentWaveformId !== data.item.id) { getTrackAnalysis(data.item.id); }
 
             document.getElementById("albumCover").src= data.item.album.images[0].url;
+            document.getElementById("albumCover").setAttribute("class", "fadeIn");
             document.getElementById("trackTitle").innerHTML = data.item.name;
             document.getElementById("trackArtist").innerHTML = data.item.artists[0].name;
         }

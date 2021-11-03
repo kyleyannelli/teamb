@@ -13,10 +13,15 @@
         PLAYLIST SELECTION
     -->
 <div id="playlistSelection">
-    <div>
-        <select id="playlists" size="10" ondblclick="switchPlayerMode()"></select>
-        <input type="button" onclick="logout()" value="Logout">
-    </div>
+        <table id="playlistTable" class="prettyTable">
+            <thead>
+            <tr>
+                <th><strong>Playlist Name</strong></th>
+            </tr>
+            </thead>
+            <tbody id="playlists">
+            </tbody>
+        </table>
 </div>
 <!--
        PLAYER SELECTION
@@ -37,17 +42,24 @@
             </ul>
         </div>
     </nav>
-    <!--
-           ANNOTATION EDITOR SELECTION
-       -->
-
-
-    <div id="waveformTitleInfoDiv">
+        <!--
+        CURRENT SONG INFO
+        -->
+        <div id="waveformTitleInfoDiv">
         <div id="trackInfo">
             <img id="albumCover">
             <div id="trackTitle"></div>
             <div id="trackArtist"></div>
         </div>
+        <!--
+            PRESENT SECTION
+        -->
+        <div id="presentSection">
+            <text id="currentAnnotation">NONE CURRENT</text><text id="nextAnnotation">NONE NEXT</text>
+        </div>
+        <!--
+           ANNOTATION EDITOR SECTION
+       -->
         <div id="annotationSection">
             <div>
                 <label for="annotationText"></label>
@@ -88,7 +100,7 @@
         <i class="fa fa-forward" style="font-size:36px;" onclick="next()"></i>
     </div>
     <div id="trackDiv">
-        <table id="tracksTable">
+        <table id="tracksTable" class="prettyTable">
             <thead>
                 <tr>
                     <th><strong>Title</strong></th>
@@ -103,12 +115,6 @@
     </div>
 </div>
 
-<!--
-       PRESENT SECTION
-   -->
-<div id="presentSection">
-
-</div>
 </body>
 
 </html>
