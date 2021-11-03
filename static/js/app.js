@@ -113,7 +113,6 @@ function switchAnnotationMode() {
         document.getElementById("trackArtist").style.display = "block";
         document.getElementById("trackTitle").style.display = "block";
     }
-    callApi("GET", USER, null, handleUserIdResponse);
     setTimeout(fetchAnnotations, 500);
 }
 
@@ -159,7 +158,6 @@ function switchPresentMode() {
     document.getElementById("trackArtist").style.display = "block";
     document.getElementById("trackTitle").style.display = "block";
 
-    callApi("GET", USER, null, handleUserIdResponse);
     setTimeout(fetchAnnotations, 500);
 
     let currentSongId = "";
@@ -1011,8 +1009,6 @@ function storeDate() {
         console.log("No Date")
         return false
     }
-
-    callApi("GET", USER, null, handleUserIdResponse);
 
     
     let dateData = "?uid=" + userId + "&track=" + trackId + "&date=" + currentDate +"&refresh_token=TESTING"
