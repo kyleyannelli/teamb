@@ -19,7 +19,8 @@ context = ssl.SSLContext()
 context.load_cert_chain('certificate.crt', 'private.key')
 
 # Step 1: Connect to MongoDB - Note: Change connection string as needed
-client = MongoClient("mongodb+srv://testuser1:testuser1@teamb.ibkvl.mongodb.net/test")
+#client = MongoClient("mongodb+srv://testuser1:testuser1@teamb.ibkvl.mongodb.net/test")
+client = MongoClient("mongodb+srv://testuser1:testuser1@production.ibkvl.mongodb.net/test")
 db = client.annotations
 
 app = Flask(__name__)
@@ -37,36 +38,12 @@ def homepage():
 def player():
     return render_template("player.html")
 
-
-@app.route("/clientSecret", methods=["GET", "POST"])
-def sendSecret():
-    if request.method == "POST":
-        message = {'clientSecret': 'daab896cb43846d995865e9d40296b01'}
-        return jsonify(message)
-    return "hey."
-
 @app.route("/authorization", methods=["GET", "POST"])
 def getAuthorization():
-    #url = ""
     client_id = "c6f5c006684341518ba23d7bae85b169"
     client_secret = "daab896cb43846d995865e9d40296b01"
     code = str(request.args.get('code', type=str))
-    # if request.method == "POST":
-    #     url = "https://accounts.spotify.com/authorize"
-    #     url += "?client_id=" + client_id
-    #     url += "&response_type=code"
-    #     url += "&redirect_uri=http://127.0.0.1:5000/player"#add redirect URL
-    #     url += "&show_dialog=true"
-    #     url += "&scope=user-read-private%20user-read-email%20user-modify-playback-state%20user-read-playback-position%20user-library-read%20streaming%20user-read-playback-state%20user-read-recently-played%20playlist-read-private"
-    #     print(url)
-    #
-    # redirect(url)
 
-    # body = "grant_type=authorization_code"
-    # body += "&code=" + code
-    # body += "&redirect_uri=http://teamb.dev:2052/player"#add redirect URL
-    # body += "&client_id=" + client_id
-    # body += "&client_secret=" + client_secret
     auth_header = base64.urlsafe_b64encode((client_id + ':' + client_secret).encode('ascii'))
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -87,8 +64,6 @@ def getAuthorization():
     access_token_response_data = access_token_request.json()
 
     return access_token_response_data
-    # Data = requests.post("https://accounts.spotify.com/api/token", data=payload, headers=headers)
-    # return str(Data)
 
 @app.route('/insert')
 def insertAnno():
