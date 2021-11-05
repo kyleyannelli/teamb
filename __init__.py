@@ -14,13 +14,17 @@ import random
 import ssl
 import re
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 context = ssl.SSLContext()
 
 context.load_cert_chain('certificate.crt', 'private.key')
 
 # Step 1: Connect to MongoDB - Note: Change connection string as needed
-#client = MongoClient("mongodb+srv://testuser1:testuser1@teamb.ibkvl.mongodb.net/test")
-client = MongoClient("mongodb+srv://testuser1:testuser1@production.ibkvl.mongodb.net/test")
+mongo_url=os.getenv('mongoUrl')
+client = MongoClient(mongo_url)
 db = client.annotations
 
 app = Flask(__name__)
@@ -41,9 +45,8 @@ def player():
 @app.route("/authorization", methods=["GET", "POST"])
 def getAuthorization():
     client_id = "c6f5c006684341518ba23d7bae85b169"
-    client_secret = "daab896cb43846d995865e9d40296b01"
     code = str(request.args.get('code', type=str))
-
+    client_secret = os.getenv('clientSecret')
     auth_header = base64.urlsafe_b64encode((client_id + ':' + client_secret).encode('ascii'))
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',

@@ -48,7 +48,8 @@
         -->
         <div id="waveformTitleInfoDiv">
         <div id="trackInfo">
-            <img id="albumCover">
+            <img id="albumCover" src="">
+            <div id="playlistName"></div>
             <div id="trackTitle"></div>
             <div id="trackArtist"></div>
         </div>
@@ -70,15 +71,15 @@
         <div id="annotationSection" style="height: 0px; visibility: hidden;">
             <div>
                 <label for="annotationText"></label>
-                <input type="text" id="annotationText" style="background-color: #d3d3d3" name="annotationText"
+                <input type="text" id="annotationText" name="annotationText"
                        placeholder="Enter annotation" required>
                 <label for="annotationTime"></label>
-                <input type="text" id="annotationTime" style="background-color: #d3d3d3" name="annotationTime"
+                <input type="text" id="annotationTime" name="annotationTime"
                        placeholder="Enter time" required>
             </div>
             <div>
-                <input type="button" onclick="storeAnnotation()" value="Update">
-                <input type="button" onclick="removeAnnotation()" value="Delete">
+                <input type="button" id="storeAnnoButton" onclick="storeAnnotation()" value="Update">
+                <input type="button" id="removeAnnoButton"onclick="removeAnnotation()" value="Delete">
             </div>
             <div>
                 <label for="songAnnotations"></label>
@@ -88,18 +89,18 @@
                 <select id="songAnnotations" size="5" onclick="setAnnotationFields()"></select>
             </div>
         </div>
-        <div id="timeStamps">
+        <div id="timeStamps" style="height: 0px; visibility:hidden;">
             <div id="progress"></div>
             <div id="duration"></div>
         </div>
-        <div id="waveformDiv">
+        <div id="waveformDiv" style="height: 0px; visibility:hidden;">
             <canvas id="canvasBg" onclick="handleWaveformClick()"></canvas>
             <canvas id="canvasTop" onclick="handleWaveformClick()"></canvas>
             <canvas id="canvasBottom" onclick="handleWaveformClick()"></canvas>
         </div>
     </div>
 
-    <div id="buttonArea">
+    <div id="buttonArea" style="height: 0px; visibility: hidden;">
         <i class="fa fa-random" style="font-size:25px;position:absolute;left:5px;margin-top: 20px;" onclick="shuffle()"></i>
         <i class="fa fa-backward" style="font-size:25px;margin-right:25px;vertical-align: super;" onclick="previous()"></i>
         <i id="pausePlay" class="fa fa-pause-circle-o" style="font-size:50px;display:none;" onclick="pause()"></i>
