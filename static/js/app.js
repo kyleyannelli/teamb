@@ -150,7 +150,7 @@ function presentAnnotations() {
         let annotation = currentSongAnnotations[i];
         let splitIndex = annotation.lastIndexOf(":");
         let anno = annotation.substring(0, splitIndex);
-        let ms = annotation.substring(splitIndex + 1, annotation.length);
+        let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length)) + 5000;
         if ((progressMs < ms) && (ms - 10000 <= progressMs)) {
             if(document.getElementById("dotsDiv") != null) {
                 document.getElementById("dotsDiv").setAttribute("class", "");
@@ -158,14 +158,9 @@ function presentAnnotations() {
             let time = Math.round(ms / 1000);
             let minutes = Math.floor(time / 60);
             let sec = time - minutes * 60 + '';
-
-            //document.getElementById("duration").innerHTML = minutesDur + ":" + secDur.padStart(2,'0');
-            // if(lastStoredAnno != anno) {
-            //     $("#currentAnnotation").fadeOut(function() {
-            //         $(this).text(anno).fadeIn();
-            //     });
-            //     lastStoredAnno = anno;
-            // }
+            if(lastStoredAnno != anno) {
+                lastStoredAnno = anno;
+            }
             document.getElementById("currentAnnotation").innerHTML = anno;
             if(currentSongAnnotations[i + 1] != null) {
                 let nextAnnotation = currentSongAnnotations[i + 1];
@@ -184,6 +179,7 @@ function presentAnnotations() {
             }
         }
         else if(i == 0){
+            //$("#currentAnnotation").text("").fadeOut();
             document.getElementById("currentAnnotation").innerHTML = "";
             document.getElementById("dotsDiv").setAttribute("class", "dot-flashing");
         }
