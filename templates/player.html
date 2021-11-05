@@ -73,20 +73,33 @@
                 <label for="annotationText"></label>
                 <input type="text" id="annotationText" name="annotationText"
                        placeholder="Enter annotation" required>
+                <br>
                 <label for="annotationTime"></label>
                 <input type="text" id="annotationTime" name="annotationTime"
                        placeholder="Enter time" required>
             </div>
-            <div>
+            <div id="editorButtons">
                 <input type="button" id="storeAnnoButton" onclick="storeAnnotation()" value="Update">
                 <input type="button" id="removeAnnoButton"onclick="removeAnnotation()" value="Delete">
             </div>
             <div>
-                <label for="songAnnotations"></label>
+<!--                <label for="songAnnotations"></label>-->
                 <!-- add default content to select box. JS will remove this because it inserts
                     by removing all items first
                 -->
-                <select id="songAnnotations" size="5" onclick="setAnnotationFields()"></select>
+<!--                <select id="songAnnotations" size="5" onclick="setAnnotationFields()"></select>-->
+                <table id="annotationsTable" class="prettyTable">
+                    <thead>
+                    <tr>
+                        <th><strong>Annotation</strong></th>
+                        <th><strong>Timestamp</strong></th>
+                        <th><strong></strong></th>
+                    </tr>
+                    </thead>
+                    <tbody id="songAnnotations">
+
+                    </tbody>
+                </table>
             </div>
         </div>
         <div id="timeStamps" style="height: 0px; visibility:hidden;">

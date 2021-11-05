@@ -81,6 +81,7 @@ function onPageLoad() {
  * switches into player mode
  */
 function switchPlayerMode() {
+    callApi("GET", USER, null, handleUserIdResponse);
     setTimeout(function() { wait() }, 400);
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
@@ -108,7 +109,6 @@ function switchPlayerMode() {
     //document.getElementById("presentSection").style.display = 'none';
     fetchTracks();
     progressMs = 0;
-    callApi("GET", USER, null, handleUserIdResponse);
 }
 
 /**
@@ -217,6 +217,8 @@ function switchPresentMode() {
         if(document.getElementById("annotationSection").style.visibility == "hidden") {
             document.getElementById("trackInfo").setAttribute("class", "shrink");
         }
+
+
         //document.getElementById("trackArtist").style.display = "none";
         //document.getElementById("trackTitle").style.display = "none";
         setTimeout(wait, 500);
@@ -227,6 +229,7 @@ function switchPresentMode() {
         if(document.getElementById("annotationSection").style.visibility == "hidden") {
             document.getElementById("trackInfo").setAttribute("class", "grow");
         }
+
         setTimeout(wait, 500);
         //document.getElementById("trackInfo").style.transform = "scale(1)";
     }
@@ -526,12 +529,30 @@ function handleAnnotationsResponse() {
 }
 
 function addAnnotations(annotation, seconds) {
-    let node = document.createElement("option");
-    node.innerHTML = annotation;
-    node.value = seconds;
+    let node = document.createElement("tr");
+    node.value = annotation;
+    node.id = seconds
+    let td1 = document.createElement("td");
+    let td2 = document.createElement("td");
+
+    let newAnno = document.createTextNode(annotation);
+
+    let time = Math.round(seconds / 1000);
+    let minutes = Math.floor(time / 60);
+    let sec = time - minutes * 60 +'';
+
+    let convertedTime = document.createTextNode(minutes + ":" + sec.padStart(2,'0'));
+    td1.appendChild(newAnno);
+    td2.appendChild(convertedTime);
+
+    node.appendChild(td1);
+    node.appendChild(td2);
+    node.setAttribute("onclick", "setAnnotationFields()");
     currentSongAnnotations.push(annotation + ":" + seconds);
     document.getElementById("songAnnotations").appendChild(node);
 }
+
+
 
 function addTrackAnnotation(item, index) {
     let node = document.createElement("option");
@@ -656,10 +677,10 @@ function handlePauseResponse() {
  * when a user selects a annotation from the box, the text and time fields are filled
  */
 function setAnnotationFields() {
-    let annotationBox = document.getElementById("songAnnotations");
-    let annotation = annotationBox.options[annotationBox.selectedIndex];
-    let text = annotation.innerText;
-    let storedMs = annotation.value;
+    $(window).scrollTop(0);
+    let annotationTable = event.target.parentElement;
+    let text = annotationTable.value;
+    let storedMs = annotationTable.id;
     var timePro = Math.round(storedMs / 1000);
     var minutesPro = Math.floor(timePro / 60);
     var secPro = timePro - minutesPro * 60 +'';
