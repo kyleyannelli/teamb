@@ -6,7 +6,8 @@
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://randojs.com/1.0.0.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body onload="onPageLoad()">
 <!--
@@ -55,6 +56,7 @@
             PRESENT SECTION
         -->
         <div id="presentSection" style="height: 0px; visibility: hidden;">
+            <div id="dotsDiv"></div>
             <div id="currentAnnotationDiv">
                 <text id="currentAnnotation"></text>
             </div>

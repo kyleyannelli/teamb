@@ -3,6 +3,72 @@ html {
     overflow-x: hidden;
 }
 
+#dotsDiv {
+    zoom: 200%;
+}
+
+/**
+ * ==============================================
+ * Dot Flashing
+ *
+ * https://nzbin.github.io/three-dots/
+ *
+ * Copyright (c) 2018 nzbin
+ *
+ * Released under the MIT license
+ * ==============================================
+ */
+.dot-flashing {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: green;
+    color: green;
+    animation: dotFlashing 1s infinite linear alternate;
+    animation-delay: .5s;
+}
+
+.dot-flashing::before, .dot-flashing::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    top: 0;
+}
+
+.dot-flashing::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: green;
+    color: green;
+    animation: dotFlashing 1s infinite alternate;
+    animation-delay: 0s;
+}
+
+.dot-flashing::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: green;
+    color: green;
+    animation: dotFlashing 1s infinite alternate;
+    animation-delay: 1s;
+}
+
+@keyframes dotFlashing {
+    0% {
+        background-color: green;
+    }
+    50%,
+    100% {
+        background-color: #d3d3d3;
+    }
+}
+
+
 .shrink {
     -webkit-transition-property: -webkit-transform;
     -webkit-transition-duration: .5s;
