@@ -37,6 +37,7 @@ var currentTrackTitle = "";
 var currentTrackArtist = "";
 var currentMarkedAnnotations = new Map();
 var lastPlayedSongId = "";
+var nextAnnotation = "";
 
 const AUTHORIZE = "https://accounts.spotify.com/authorize"
 const TOKEN = "https://accounts.spotify.com/api/token";
@@ -59,6 +60,7 @@ const INSERTDATE = "https://teamb.dev:2052/insertDate";
 const RETRIEVEDATES = "https://teamb.dev:2052/retrieveDates";
 const REMOVE = "https://teamb.dev:2052/remove"
 const AUTHORIZETEAMB = "https://teamb.dev:2052/authorization"
+const REFRESHTEAMB = "https://teamb.dev:2052/refreshAccessToken";
 
 function onPageLoad() {
     client_id = localStorage.getItem("client_id");
@@ -164,8 +166,13 @@ function presentAnnotations() {
                 lastStoredAnno = anno;
             }
             document.getElementById("currentAnnotation").innerHTML = anno;
+
+            if(anno.length > 60 && anno.length < 139 && document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "220px";
+            else if(139 < anno.length  && document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "320px";
+            else document.getElementById("presentSection").style.height = "120px";
+
             if(currentSongAnnotations[i + 1] != null) {
-                let nextAnnotation = currentSongAnnotations[i + 1];
+                nextAnnotation = currentSongAnnotations[i + 1];
                 let nSplitIndex = nextAnnotation.lastIndexOf(":")
                 let nextAnno = nextAnnotation.substring(0, nSplitIndex);
                 let nextMs = nextAnnotation.substring(nSplitIndex + 1, nextAnnotation.length);
@@ -173,7 +180,6 @@ function presentAnnotations() {
                 let nTime = Math.round(nextMs / 1000);
                 let nMinutes = Math.floor(nTime / 60);
                 let nSec = nTime - nMinutes * 60 + '';
-
                 document.getElementById("nextAnnotation").innerHTML = nextAnno.substring(0, 10) + "...";
             }
             else {
@@ -182,6 +188,7 @@ function presentAnnotations() {
         }
         else if(i == 0){
             //$("#currentAnnotation").text("").fadeOut();
+            document.getElementById("presentSection").style.height = "100px";
             document.getElementById("currentAnnotation").innerHTML = "";
             document.getElementById("dotsDiv").setAttribute("class", "dot-flashing");
         }
@@ -321,7 +328,7 @@ function requestAuthorization() {
 }
 
 function fetchAccessToken(code) {
-    callApi("POST", AUTHORIZETEAMB + "?code=" +code, null, handleAuthorizationResponse)
+    callApi("POST", AUTHORIZETEAMB + "?code=" +code, null, handleAuthorizationResponse);
 }
 
 function handleAuthorizationResponse() {
@@ -335,7 +342,9 @@ function handleAuthorizationResponse() {
             refresh_token = data.refresh_token;
             localStorage.setItem("refresh_token", refresh_token);
         }
-        onPageLoad();
+        if(!(document.getElementById("playerSection").style.display == "block")) {
+            onPageLoad();
+        }
     } else {
         console.log(this.responseText);
         //alert(this.responseText);
@@ -344,10 +353,7 @@ function handleAuthorizationResponse() {
 
 function refreshAccessToken() {
     refresh_token = localStorage.getItem("refresh_token");
-    let body = "grant_type=refresh_token";
-    body += "&refresh_token=" + refresh_token;
-    body += "&client_id=" + client_id;
-    callAuthorizationApi(body);
+    callApi("POST", REFRESHTEAMB + "?rt=" + refresh_token, null, handleAuthorizationResponse);
 }
 
 
@@ -639,9 +645,9 @@ function previous() {
 }
 
 function getPlaylistImage(id) {
-    console.log(id);
+    //console.log(id);
     let updatedUrl = PLAYLISTIMAGE.replace("{playlist_id}", id);
-    console.log(updatedUrl);
+    //console.log(updatedUrl);
     callApi("GET", updatedUrl, null, handlePlaylistImage);
 }
 
@@ -1183,6 +1189,9 @@ window.onSpotifyPlayerAPIReady = () => {
             progressMs += paused ? 0 : 1000;
         }, 1000);
         currentDuration = duration;
+        if(trackId != current_track.id){
+            nextAnnotation = "";
+        }
         trackId = current_track.id
         currentPlayingObject = current_track;
         currentlyPlaying();

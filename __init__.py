@@ -68,6 +68,32 @@ def getAuthorization():
 
     return access_token_response_data
 
+@app.route("/refreshAccessToken", methods=["GET", "POST"])
+def getAccess():
+    client_id = "c6f5c006684341518ba23d7bae85b169"
+    rt = str(request.args.get('rt', type=str))
+    client_secret = os.getenv('clientSecret')
+    auth_header = base64.urlsafe_b64encode((client_id + ':' + client_secret).encode('ascii'))
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic %s' % auth_header.decode('ascii')
+    }
+    payload = {
+        'grant_type': 'refresh_token',
+        'refresh_token': rt,
+        'redirect_uri': 'https://teamb.dev:2052/player',
+        'client_id': client_id,
+        'client_secret': client_secret,
+    }
+
+    # Make a request to the /token endpoint to get an access token
+    access_token_request = requests.post("https://accounts.spotify.com/api/token", data=payload, headers=headers)
+
+    # convert the response to JSON
+    access_token_response_data = access_token_request.json()
+
+    return access_token_response_data
+
 @app.route('/insert')
 def insertAnno():
     spotify_uid = str(request.args.get('uid', type=str))
