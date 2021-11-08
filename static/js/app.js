@@ -68,15 +68,11 @@ function onPageLoad() {
         handleRedirect();
     } else {
         access_token = localStorage.getItem("access_token");
-        if (access_token == null) {
-            // we don't have an access token so present token section
-            document.getElementById("tokenSection").style.display = 'block';
-        } else {
-            // we have an access token so present de
+        refreshPlaylists();
+        currentlyPlaying();
+        setTimeout(function () {
             document.getElementById("playlistSelection").style.display = 'block';
-            refreshPlaylists();
-            currentlyPlaying();
-        }
+        }, 800);
     }
     refreshRadioButtons();
 }
@@ -85,7 +81,6 @@ function onPageLoad() {
  * switches into player mode
  */
 function switchPlayerMode() {
-    callApi("GET", USER, null, handleUserIdResponse);
     setTimeout(function() { wait() }, 400);
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
@@ -342,6 +337,11 @@ function handleAuthorizationResponse() {
             refresh_token = data.refresh_token;
             localStorage.setItem("refresh_token", refresh_token);
         }
+
+        setTimeout(function (){
+            callApi("GET", USER, null, handleUserIdResponse);
+        }, 1000);
+
         if(!(document.getElementById("playerSection").style.display == "block")) {
             onPageLoad();
         }
@@ -509,10 +509,10 @@ function removeAnnotation() {
 function handleUserIdResponse() {
     if (this.status == 200) {
         userId = JSON.parse(this.responseText)["id"];
-        // console.log(userId);
+        console.log("UserID in Handle" + userId);
     } else {
         console.log(this.responseText);
-        //alert(this.responseText);
+        alert(this.responseText);
     }
 }
 
@@ -1151,8 +1151,9 @@ window.onSpotifyPlayerAPIReady = () => {
     player.on('ready', data => {
         console.log('Ready with Device ID', data.device_id);
         web_player_id = data.device_id;
-        callApi("GET", USER, null, handleUserIdResponse);
     });
+
+    //console.log(userId);
 
     player.addListener('player_state_changed', ({paused, position, duration, track_window: {current_track}}) => {
         for(let i in currentPlaylistJson) {
