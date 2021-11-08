@@ -35,6 +35,8 @@ var lastStoredAnno = "";
 var currentAlbumCover = "";
 var currentTrackTitle = "";
 var currentTrackArtist = "";
+var currentMarkedAnnotations = new Map();
+var lastPlayedSongId = "";
 
 const AUTHORIZE = "https://accounts.spotify.com/authorize"
 const TOKEN = "https://accounts.spotify.com/api/token";
@@ -124,7 +126,7 @@ function switchAnnotationMode() {
     if(document.getElementById("annotationSection").style.visibility == 'hidden')
     {
         document.getElementById("annotationSection").style.visibility = 'visible';
-        document.getElementById("annotationSection").style.height = "200px";
+        document.getElementById("annotationSection").style.height = "250px";
         if(document.getElementById("presentSection").style.visibility == "hidden") {
             document.getElementById("trackInfo").setAttribute("class", "shrink");
         }
@@ -429,21 +431,27 @@ function storeAnnotation() {
     //get annotation text and timestamp from page form
     //replace whitespace with _
     let annotation = String(document.getElementById("annotationText").value).replace(/\s/g, '_')
-    let MMSS = String(document.getElementById("annotationTime").value)
-    let MMSSArray = MMSS.split(':');
-    let milliseconds = (MMSSArray[0] * 60000) + (MMSSArray[1] * 1000);
-    //console.log(milliseconds);
+    // let MMSS = String(document.getElementById("annotationTime").value)
+    let min = String(document.getElementById("annotationMin").value)
+    let sec = String(document.getElementById("annotationSec").value)
+    // let milliseconds = (MMSS * 60000) + (MMSSArray[1] * 1000);
+    let milliseconds = (min * 60000) + (sec * 1000);
     //make sure form isn't empty
-    if (annotation == '' || MMSS == '') {
+    if (annotation == '' || min == '' || sec == '') {
         alert("Please enter both the annotation and timestamp.")
         return false
+    }
+    else if (!(min >= 0) || !(sec >= 0 && sec <= 59)) {
+        alert("Please enter a valid time.");
+        return false;
     }
     // Get User
     let trackIndex = currentIndex;
     let arrayIndex = 0;
-    if (trackIndex > 100) {
+    if (trackIndex > 99) {
         arrayIndex = trackIndex.charAt(0);
     }
+    trackIndex -= (100 * arrayIndex);
     let id = jsonArray[arrayIndex].items[trackIndex].track.id;
     let annotationData = "?uid=" + userId + "&track=" + id + "&anno=" + annotation + "&sec=" + milliseconds + "&refresh_token=TESTING"
 
@@ -452,7 +460,8 @@ function storeAnnotation() {
     //refresh annotations for currently selected song
     //refreshAnnotations()
     document.getElementById("annotationText").value = "";
-    document.getElementById("annotationTime").value = "";
+    document.getElementById("annotationMin").value = "";
+    document.getElementById("annotationSec").value = "";
     setTimeout(fetchAnnotations, 500);
 }
 
@@ -462,9 +471,10 @@ function storeAnnotation() {
 function removeAnnotation() {
     //get annotation text and timestamp from page form
     //replace whitespace with _
-    let MMSS = String(document.getElementById("annotationTime").value)
+    let MM = String(document.getElementById("annotationMin").value)
+    let SS = String(document.getElementById("annotationSec").value)
     //make sure form isnt empty
-    if (MMSS == '') {
+    if (MM == '' || SS == '') {
         alert("Please enter both the annotation and timestamp.")
         return false
     }
@@ -473,11 +483,11 @@ function removeAnnotation() {
     //let dropdown = document.getElementById("tracks");
     let trackIndex = currentIndex; //dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
-    if (trackIndex > 100) {
+    if (trackIndex > 99) {
         arrayIndex = trackIndex.charAt(0);
     }
-    let MMSSArray = MMSS.split(':');
-    let milliseconds = (MMSSArray[0] * 60000) + (MMSSArray[1] * 1000);
+    trackIndex -= (100 * arrayIndex);
+    let milliseconds = (MM * 60000) + (SS * 1000);
     let id = jsonArray[arrayIndex].items[trackIndex].track.id;
     let removalData = "?uid=" + userId + "&track=" + id + "&sec=" + milliseconds;
     //send off to mongodb
@@ -486,7 +496,8 @@ function removeAnnotation() {
     //refreshAnnotations()
     setTimeout(fetchAnnotations, 500);
     document.getElementById("annotationText").value = "";
-    document.getElementById("annotationTime").value = "";
+    document.getElementById("annotationMin").value = "";
+    document.getElementById("annotationSec").value = ""
 }
 
 function handleUserIdResponse() {
@@ -504,11 +515,10 @@ function fetchAnnotations() {
     //let dropdown = document.getElementById("tracks");
     let trackIndex =  currentIndex;//dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
-    if (trackIndex > 100) {
+    if (trackIndex > 99) {
         arrayIndex = trackIndex.charAt(0);
     }
-    // console.log(jsonArray[arrayIndex].items[trackIndex])
-    // console.log(trackIndex)
+    trackIndex -= (100 * arrayIndex);
     if (userId != '' && jsonArray[arrayIndex].items[trackIndex].track != null) callApi("GET", RETRIEVE + "?uid=" + userId + "&track=" + jsonArray[arrayIndex].items[trackIndex].track.id, null, handleAnnotationsResponse)
 }
 
@@ -685,7 +695,9 @@ function setAnnotationFields() {
     var minutesPro = Math.floor(timePro / 60);
     var secPro = timePro - minutesPro * 60 +'';
     document.getElementById("annotationText").value = text;
-    document.getElementById("annotationTime").value = minutesPro + ":" + secPro.padStart(2,'0');
+    // document.getElementById("annotationText").value = minutesPro + ":" + secPro.padStart(2,'0');
+    document.getElementById("annotationMin").value = minutesPro;
+    document.getElementById("annotationSec").value = secPro.padStart(2,'0');
     seek(storedMs);
 }
 
@@ -702,7 +714,7 @@ function fetchTracks() {
     if (playlistId.length > 0) {
         let url = TRACKS.replace("{{PlaylistId}}", playlistId);
         //reset jsonarray here otherwise the previous playlists would still be stored
-        jsonArray = []
+        jsonArray = [];
         callApi("GET", RETRIEVEDATES + "?uid=" + userId, null, handleDatesResponse);
         setTimeout(function () {
             callApi("GET", url, null, handleTracksResponse);
@@ -720,7 +732,7 @@ function handleDatesResponse() {
         for (var key in data) {
             currentPlaylistDates.push({[key]: data[key]});
         }
-        //console.log(currentPlaylistDates);
+
     }
     else{
         console.log(this.responseText)
@@ -767,14 +779,15 @@ function addTrack(item, index) {
                 today.setHours(0,0,0,0);
                 oldDate.setHours(0,0,0,0)
                 let diff = (+today - +oldDate)/msInDay
+                let floorDiff = Math.floor(diff);
                 if(diff == 0) {
                     lastPlayed = document.createTextNode("Today");
                 }
                 else if(diff == 1) {
-                    lastPlayed = document.createTextNode(diff + " Day Ago");
+                    lastPlayed = document.createTextNode(floorDiff + " Day Ago");
                 }
                 else {
-                    lastPlayed = document.createTextNode(diff + " Days Ago");
+                    lastPlayed = document.createTextNode(floorDiff + " Days Ago");
                 }
             }
         }
@@ -989,6 +1002,9 @@ function drawWaveforms(data) {
  * Data is the array of points.
  */
 function drawWaveform(data, id, offset) {
+    if(lastPlayedSongId != trackId) {
+        currentMarkedAnnotations = new Map();
+    }
     let canvas = document.getElementById(id);
     let {height, width} = canvas.parentNode.getBoundingClientRect();
 
@@ -1007,10 +1023,29 @@ function drawWaveform(data, id, offset) {
                 fill = "white"
             }
             else {
-                if ((x / width) < ((progressMs - offset) / currentDuration)) {
+                let check = false;
+                if(currentSongAnnotations != null) {
+                    let firstAnno = currentSongAnnotations[0].substring(0, currentSongAnnotations[0].lastIndexOf(":"));
+                    if(!(firstAnno == "You have no annotations for this song!")) {
+                        for(let a = 0; a < currentSongAnnotations.length; a++) {
+                            let annotation = currentSongAnnotations[a];
+                            let splitIndex = annotation.lastIndexOf(":");
+                            let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length))
+                            let percentage = ms / currentDuration;
+                            if (((x / width) > (percentage) && (percentage + .01) > (x / width)) && currentMarkedAnnotations.get(annotation) == undefined) {
+                                check = true;
+                                currentMarkedAnnotations.set(annotation, true);
+                            }
+                        }
+                    }
+                }
+                if (check) {
+                    fill = "orange"
+                }
+                else if ((x / width) < ((progressMs - offset) / currentDuration)) {
                     fill = "green";
                 } else {
-                    fill = "white"
+                    fill = "#d3d3d3"
                 }
             }
 
@@ -1038,7 +1073,9 @@ function handleWaveformClick() {
         var timePro = Math.round(progressMs / 1000);
         var minutesPro = Math.floor(timePro / 60);
         var secPro = timePro - minutesPro * 60 +'';
-        document.getElementById("annotationTime").value = minutesPro + ":" + secPro.padStart(2,'0');
+        // document.getElementById("annotationTime").value = minutesPro + ":" + secPro.padStart(2,'0');
+        document.getElementById("annotationMin").value = minutesPro;
+        document.getElementById("annotationSec").value = secPro.padStart(2, '0');
     }, 1000);
 }
 
@@ -1067,27 +1104,24 @@ function showProgress(){
  *
  */
  function getDate(){
-     const date = new Date();
-     let day = date.getDay();
+     let date = new Date();
+     let day = date.getDate();
      let month = date.getMonth()+1;
      let year = date.getFullYear();
      currentDate = month+"/"+day+"/"+year;
-     //console.log(currentDate);
  }
 
 function storeDate() {
     getDate();
-
     //make sure form isnt empty
     if (currentDate == "") {
-        //console.log("No Date")
+        console.log("No Date")
         return false
     }
     let dateData = "?uid=" + userId + "&track=" + trackId + "&date=" + currentDate +"&refresh_token=TESTING"
 
     //send off to mongodb
     callApi("GET", INSERTDATE + dateData, null, null)
-
 }
 
 /**

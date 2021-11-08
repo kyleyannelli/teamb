@@ -74,9 +74,11 @@
                 <input type="text" id="annotationText" name="annotationText"
                        placeholder="Enter annotation" required>
                 <br>
-                <label for="annotationTime"></label>
-                <input type="text" id="annotationTime" name="annotationTime"
-                       placeholder="Enter time" required>
+                <label for="annotationMin"></label>
+                <label for="annotationSec"></label>
+                <input type="text" id="annotationMin" name="annotationTime" required placeholder="min">
+                <text id="colon">:</text>
+                <input type="text" id="annotationSec" name="annotationSec" required placeholder="sec">
             </div>
             <div id="editorButtons">
                 <input type="button" id="storeAnnoButton" onclick="storeAnnotation()" value="Update">

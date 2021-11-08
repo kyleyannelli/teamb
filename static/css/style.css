@@ -209,7 +209,7 @@ html {
 #annotationsTable tr{
     background-color: transparent;
 }
-#annotationTime{
+#annotationMin{
     background: #333333;
     background-color: transparent;
     color: #eeeeee;
@@ -219,7 +219,28 @@ html {
     border-left: none;
     border-right: none;
     border-bottom: solid #eeeeee 1px;
-    padding: 3px 10px;
+    width: 5%;
+    /*padding: 3px 10px;*/
+}
+
+#annotationSec{
+    background: #333333;
+    background-color: transparent;
+    color: #eeeeee;
+    outline: none;
+    outline-style: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: solid #eeeeee 1px;
+    width: 5%;
+    /*padding: 3px 10px;*/
+}
+
+#colon{
+    color: lightgray;
+    font-size: 24px;
+    margin-right: -5px;
 }
 
 #annotationText{
@@ -233,6 +254,7 @@ html {
     border-right: none;
     border-bottom: solid #eeeeee 1px;
     padding: 3px 10px;
+    width: 70%;
 }
 
 #storeAnnoButton{
@@ -479,7 +501,6 @@ html {
 }
 
 #annotationSection input[type=text]{
-    width: 70%;
     text-align: center;
     font-size: 30px;
 }
@@ -487,6 +508,7 @@ html {
 #annotationSection {
     text-align: center;
     visibility: hidden;
+    margin-bottom: 10px;
     height: 0px;
     overflow: hidden;
     overflow-y: auto;
