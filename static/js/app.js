@@ -68,6 +68,7 @@ function onPageLoad() {
         handleRedirect();
     } else {
         access_token = localStorage.getItem("access_token");
+        if(localStorage.getItem("userId") != null) userId = localStorage.getItem("userId");
         refreshPlaylists();
         currentlyPlaying();
         setTimeout(function () {
@@ -164,7 +165,7 @@ function presentAnnotations() {
 
             if(anno.length > 60 && anno.length < 139 && document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "220px";
             else if(139 < anno.length  && document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "320px";
-            else document.getElementById("presentSection").style.height = "120px";
+            else if(document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "120px";
 
             if(currentSongAnnotations[i + 1] != null) {
                 nextAnnotation = currentSongAnnotations[i + 1];
@@ -183,7 +184,9 @@ function presentAnnotations() {
         }
         else if(i == 0){
             //$("#currentAnnotation").text("").fadeOut();
-            document.getElementById("presentSection").style.height = "100px";
+            if(document.getElementById("presentSection").style.visibility == "visible") {
+                document.getElementById("presentSection").style.height = "100px";
+            }
             document.getElementById("currentAnnotation").innerHTML = "";
             document.getElementById("dotsDiv").setAttribute("class", "dot-flashing");
         }
@@ -436,7 +439,7 @@ function removeAllItems(elementId) {
 function storeAnnotation() {
     //get annotation text and timestamp from page form
     //replace whitespace with _
-    let annotation = String(document.getElementById("annotationText").value).replace(/\s/g, '_')
+    let annotation = String(document.getElementById("annotationText").value);
     // let MMSS = String(document.getElementById("annotationTime").value)
     let min = String(document.getElementById("annotationMin").value)
     let sec = String(document.getElementById("annotationSec").value)
@@ -459,8 +462,8 @@ function storeAnnotation() {
     }
     trackIndex -= (100 * arrayIndex);
     let id = jsonArray[arrayIndex].items[trackIndex].track.id;
-    let annotationData = "?uid=" + userId + "&track=" + id + "&anno=" + annotation + "&sec=" + milliseconds + "&refresh_token=TESTING"
-
+    let regAnno = annotation.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s/g, '_');
+    let annotationData = "?uid=" + userId + "&track=" + id + "&anno=" + regAnno + "&sec=" + milliseconds + "&refresh_token=TESTING"
     //send off to mongodb
     callApi("GET", INSERT + annotationData, null, null)
     //refresh annotations for currently selected song
@@ -509,7 +512,8 @@ function removeAnnotation() {
 function handleUserIdResponse() {
     if (this.status == 200) {
         userId = JSON.parse(this.responseText)["id"];
-        console.log("UserID in Handle" + userId);
+        localStorage.setItem("userId", userId);
+        //console.log("UserID in Handle " + userId);
     } else {
         console.log(this.responseText);
         alert(this.responseText);
@@ -600,6 +604,7 @@ function play(index) {
 function handleRowTrackClick() {
     if(clickedRow != null && clickedRow != "") clickedRow.setAttribute("class", "");
     clickedRow = event.target;
+    clickedRow.parentElement.cells[2].innerHTML = "Today";
     play(clickedRow.parentElement.value);
 }
 
@@ -731,6 +736,8 @@ function fetchTracks() {
 
 function handleDatesResponse() {
     if (this.status == 200) {
+        let localUID = localStorage.getItem("userId");
+        if(localUID != null) userId = localUID;
         currentPlaylistDates = [];
         var data = JSON.parse(this.responseText);
         // console.log(data);
@@ -1030,7 +1037,9 @@ function drawWaveform(data, id, offset) {
             }
             else {
                 let check = false;
-                if(currentSongAnnotations != null) {
+                if(currentSongAnnotations != null &&
+                    document.getElementById("presentSection").style.visibility == "visible" ||
+                    document.getElementById("annotationSection").style.visibility == "visible") {
                     let firstAnno = currentSongAnnotations[0].substring(0, currentSongAnnotations[0].lastIndexOf(":"));
                     if(!(firstAnno == "You have no annotations for this song!")) {
                         for(let a = 0; a < currentSongAnnotations.length; a++) {
@@ -1192,6 +1201,7 @@ window.onSpotifyPlayerAPIReady = () => {
         currentDuration = duration;
         if(trackId != current_track.id){
             nextAnnotation = "";
+            document.getElementById("nextAnnotation").innerHTML = "";
         }
         trackId = current_track.id
         currentPlayingObject = current_track;
