@@ -23,7 +23,7 @@ context = ssl.SSLContext()
 context.load_cert_chain('certificate.crt', 'private.key')
 
 # Step 1: Connect to MongoDB - Note: Change connection string as needed
-mongo_url=os.getenv('mongoUrl')
+mongo_url = os.getenv('mongoUrl')
 client = MongoClient(mongo_url)
 db = client.annotations
 
@@ -41,6 +41,7 @@ def homepage():
 @app.route("/player")
 def player():
     return render_template("player.html")
+
 
 @app.route("/authorization", methods=["GET", "POST"])
 def getAuthorization():
@@ -68,9 +69,11 @@ def getAuthorization():
 
     return access_token_response_data
 
+
 @app.route("/refreshAccessToken", methods=["GET", "POST"])
 def getAccess():
     client_id = "c6f5c006684341518ba23d7bae85b169"
+    spotify_uid = str(request.args.get('uid', type=str))
     rt = str(request.args.get('rt', type=str))
     client_secret = os.getenv('clientSecret')
     auth_header = base64.urlsafe_b64encode((client_id + ':' + client_secret).encode('ascii'))
@@ -92,7 +95,25 @@ def getAccess():
     # convert the response to JSON
     access_token_response_data = access_token_request.json()
 
+    testRtS(spotify_uid, access_token_response_data["access_token"])
+
     return access_token_response_data
+
+
+def testRtS(spotify_uid, at):
+    try:
+        jsonData = {'_id': "access_token", "a_token": at}
+        db[spotify_uid].insert_one(jsonData)
+        return "inserted"
+    except:
+        #   define the query (what we are looking for)
+        query = {'_id': "access_token"}
+        #   create new json with receieved data
+        newJson = {"a_token": at}
+        #   now we overwrite the annotations object in the document with our merged json
+        updateString = db[spotify_uid].update(query, {"$set": newJson})
+        return "updated"
+
 
 @app.route('/insert')
 def insertAnno():
@@ -100,8 +121,11 @@ def insertAnno():
     track_id = str(request.args.get('track', type=str))
     annotation = str(request.args.get('anno', type=str))
     seconds = str(request.args.get('sec', type=str))
+    access_token = str(request.args.get('access_token', type=str))
 
-    refresh_token = str(request.args.get('refresh_token', type=str))
+    if not verifyAction(spotify_uid, access_token):
+        return "verification failed"
+
     #     create json with given data
     #     spotify track id is the id
     #     then the annotations object holds annotations where seconds is the key to each annotation
@@ -137,11 +161,13 @@ def insertDate():
     spotify_uid = str(request.args.get('uid', type=str))
     track_id = str(request.args.get('track', type=str))
     date = str(request.args.get('date', type=str))
+    access_token = str(request.args.get('access_token', type=str))
+    if not verifyAction(spotify_uid, access_token):
+        return "verification failed"
 
-    refresh_token = str(request.args.get('refresh_token', type=str))
     #     create json with given data
     #     spotify track id is the id
-    jsonData = {'_id': "datesCollection", "dates" : {track_id: date}}
+    jsonData = {'_id': "datesCollection", "dates": {track_id: date}}
     try:
         db[spotify_uid].insert_one(jsonData)
         return "done"
@@ -166,6 +192,10 @@ def insertDate():
 def retrieve():
     spotify_uid = str(request.args.get('uid', type=str))
     track_id = str(request.args.get('track', type=str))
+    access_token = str(request.args.get('access_token', type=str))
+    if not verifyAction(spotify_uid, access_token):
+        return "verification failed"
+
     #   define the query (what we are looking for)
     query = {'_id': track_id}
     result = ""
@@ -179,10 +209,15 @@ def retrieve():
         return jsonify({"0": "You have no annotations for this song!"})
     return result
 
+
 @app.route('/retrieveDates')
 def retrieveDates():
     spotify_uid = str(request.args.get('uid', type=str))
     #   define the query (what we are looking for)
+    access_token = str(request.args.get('access_token', type=str))
+    if not verifyAction(spotify_uid, access_token):
+        return "verification failed"
+
     query = {'_id': "datesCollection"}
     result = ""
     try:
@@ -195,11 +230,18 @@ def retrieveDates():
         return jsonify({"0": "Never Played"})
     return result
 
+
 @app.route('/remove')
 def remove():
     spotify_uid = str(request.args.get('uid', type=str))
     track_id = str(request.args.get('track', type=str))
     seconds = str(request.args.get('sec', type=str))
+
+    access_token = str(request.args.get('access_token', type=str))
+
+    if not verifyAction(spotify_uid, access_token):
+        return "verification failed"
+
     #   define the query (what we are looking for)
     query = {'_id': track_id}
     try:
@@ -233,6 +275,7 @@ def edit(spt_uid, tk_id, anno, sec, existingResults):
     #   now we overwrite the annotations object in the document with our merged json
     db[spt_uid].update(query, {"$set": {"annotations": mergedJson}})
 
+
 def editDate(spt_uid, tk_id, date, existingResults):
     #   define the query (what we are looking for)
     query = {'_id': "datesCollection"}
@@ -242,6 +285,23 @@ def editDate(spt_uid, tk_id, date, existingResults):
     mergedJson = merge(newJson, existingResults)
     #   now we overwrite the annotations object in the document with our merged json
     db[spt_uid].update(query, {"$set": {"dates": mergedJson}})
+
+
+def verifyAction(spotify_uid, access_token):
+    access_token = str(request.args.get('access_token', type=str))
+    query = {'_id': "access_token"}
+    result = ""
+    try:
+        result = db[spotify_uid].find(query)[0]["a_token"]
+        if result == {}:
+            return False
+    except IndexError as e:
+        return False
+    except KeyError as e:
+        return False
+    if result != access_token:
+        return False
+    return True
 
 
 # DON'T CHANGE

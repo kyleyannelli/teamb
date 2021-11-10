@@ -38,6 +38,9 @@ var currentTrackArtist = "";
 var currentMarkedAnnotations = new Map();
 var lastPlayedSongId = "";
 var nextAnnotation = "";
+var waveformColor = "green";
+var timeBeforeAnno = 5;
+var annotationColor = "orange";
 
 const AUTHORIZE = "https://accounts.spotify.com/authorize"
 const TOKEN = "https://accounts.spotify.com/api/token";
@@ -71,9 +74,6 @@ function onPageLoad() {
         if(localStorage.getItem("userId") != null) userId = localStorage.getItem("userId");
         refreshPlaylists();
         currentlyPlaying();
-        setTimeout(function () {
-            document.getElementById("playlistSelection").style.display = 'block';
-        }, 800);
     }
     refreshRadioButtons();
 }
@@ -87,8 +87,8 @@ function switchPlayerMode() {
     document.getElementById("playlistSelection").style.display = 'none';
     //hide annotation editor
     //show player stuff
-    document.getElementById("playerSection").style.display = 'block';
     document.getElementById("trackTitle").style.visibility = 'hidden';
+    document.getElementById("playerSection").style.display = 'block';
     document.getElementById("trackArtist").style.visibility = 'hidden';
     document.getElementById("timeStamps").style.visibility = 'hidden';
     document.getElementById("timeStamps").style.height = "0px";
@@ -144,14 +144,35 @@ function switchAnnotationMode() {
     setTimeout(fetchAnnotations, 500);
 }
 
+function showSettings() {
+    document.getElementById("modalMenu").style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById("modalMenu").style.display = 'none';
+    timeBeforeAnno = document.getElementById("timeBeforeAnnoDropdown").value;
+    waveformColor = document.getElementById("waveformColorDropdown").value;
+    annotationColor = document.getElementById("annotationColorDropdown").value;
+}
+
+// function handleSettings() {
+//     var e = document.getElementById("waveformColorDropdown");
+//     waveformColor = e.options[e.selectedIndex].value;
+//     var e2 = document.getElementById("annotationColorDropdown");
+//     annototationColor = e2.options[e2.selectedIndex].value;
+//     var e3 = document.getElementById("timeBeforeAnnoDropdown");
+//     timeBeforeAnno = e3.options[e3.selectedIndex].value;
+// }
+
 function presentAnnotations() {
     for (let i = 0; i < currentSongAnnotations.length; i++) {
 
         let annotation = currentSongAnnotations[i];
         let splitIndex = annotation.lastIndexOf(":");
         let anno = annotation.substring(0, splitIndex);
-        let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length)) + 5000;
-        if ((progressMs < ms) && (ms - 10000 <= progressMs)) {
+        let timeBeforeAnnoMs = timeBeforeAnno * 1000;
+        let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length)) + timeBeforeAnnoMs/2;
+        if ((progressMs < ms) && (ms - timeBeforeAnnoMs <= progressMs)) {
             if(document.getElementById("dotsDiv") != null) {
                 document.getElementById("dotsDiv").setAttribute("class", "");
             }
@@ -326,7 +347,7 @@ function requestAuthorization() {
 }
 
 function fetchAccessToken(code) {
-    callApi("POST", AUTHORIZETEAMB + "?code=" +code, null, handleAuthorizationResponse);
+    callApi("POST", AUTHORIZETEAMB + "?code=" + code, null, handleAuthorizationResponse);
 }
 
 function handleAuthorizationResponse() {
@@ -341,9 +362,11 @@ function handleAuthorizationResponse() {
             localStorage.setItem("refresh_token", refresh_token);
         }
 
-        setTimeout(function (){
-            callApi("GET", USER, null, handleUserIdResponse);
-        }, 1000);
+        if(userId == "" || userId == null) {
+            setTimeout(function (){
+                callApi("GET", USER, null, handleUserIdResponse);
+            }, 1000);
+        }
 
         if(!(document.getElementById("playerSection").style.display == "block")) {
             onPageLoad();
@@ -356,7 +379,7 @@ function handleAuthorizationResponse() {
 
 function refreshAccessToken() {
     refresh_token = localStorage.getItem("refresh_token");
-    callApi("POST", REFRESHTEAMB + "?rt=" + refresh_token, null, handleAuthorizationResponse);
+    callApi("POST", REFRESHTEAMB +"?uid="+ userId + "&rt=" + refresh_token, null, handleAuthorizationResponse);
 }
 
 
@@ -463,7 +486,7 @@ function storeAnnotation() {
     trackIndex -= (100 * arrayIndex);
     let id = jsonArray[arrayIndex].items[trackIndex].track.id;
     let regAnno = annotation.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s/g, '_');
-    let annotationData = "?uid=" + userId + "&track=" + id + "&anno=" + regAnno + "&sec=" + milliseconds + "&refresh_token=TESTING"
+    let annotationData = "?uid=" + userId + "&track=" + id + "&anno=" + regAnno + "&sec=" + milliseconds + "&access_token=" + localStorage.getItem("access_token");
     //send off to mongodb
     callApi("GET", INSERT + annotationData, null, null)
     //refresh annotations for currently selected song
@@ -498,7 +521,7 @@ function removeAnnotation() {
     trackIndex -= (100 * arrayIndex);
     let milliseconds = (MM * 60000) + (SS * 1000);
     let id = jsonArray[arrayIndex].items[trackIndex].track.id;
-    let removalData = "?uid=" + userId + "&track=" + id + "&sec=" + milliseconds;
+    let removalData = "?uid=" + userId + "&track=" + id + "&sec=" + milliseconds + "&access_token=" + localStorage.getItem("access_token");
     //send off to mongodb
     callApi("GET", REMOVE + removalData, null, null)
     //refresh annotations for currently selected song
@@ -514,6 +537,7 @@ function handleUserIdResponse() {
         userId = JSON.parse(this.responseText)["id"];
         localStorage.setItem("userId", userId);
         //console.log("UserID in Handle " + userId);
+        refreshAccessToken();
     } else {
         console.log(this.responseText);
         alert(this.responseText);
@@ -529,7 +553,7 @@ function fetchAnnotations() {
         arrayIndex = trackIndex.charAt(0);
     }
     trackIndex -= (100 * arrayIndex);
-    if (userId != '' && jsonArray[arrayIndex].items[trackIndex].track != null) callApi("GET", RETRIEVE + "?uid=" + userId + "&track=" + jsonArray[arrayIndex].items[trackIndex].track.id, null, handleAnnotationsResponse)
+    if (userId != '' && jsonArray[arrayIndex].items[trackIndex].track != null) callApi("GET", RETRIEVE + "?uid=" + userId + "&track=" + jsonArray[arrayIndex].items[trackIndex].track.id + "&access_token=" + localStorage.getItem("access_token"), null, handleAnnotationsResponse)
 }
 
 function handleAnnotationsResponse() {
@@ -726,7 +750,7 @@ function fetchTracks() {
         let url = TRACKS.replace("{{PlaylistId}}", playlistId);
         //reset jsonarray here otherwise the previous playlists would still be stored
         jsonArray = [];
-        callApi("GET", RETRIEVEDATES + "?uid=" + userId, null, handleDatesResponse);
+        callApi("GET", RETRIEVEDATES + "?uid=" + userId + "&access_token="+ localStorage.getItem("access_token"), null, handleDatesResponse);
         setTimeout(function () {
             callApi("GET", url, null, handleTracksResponse);
         }, 200);
@@ -1055,10 +1079,10 @@ function drawWaveform(data, id, offset) {
                     }
                 }
                 if (check) {
-                    fill = "orange"
+                    fill = annotationColor;
                 }
                 else if ((x / width) < ((progressMs - offset) / currentDuration)) {
-                    fill = "green";
+                    fill = waveformColor;
                 } else {
                     fill = "#d3d3d3"
                 }
@@ -1133,7 +1157,7 @@ function storeDate() {
         console.log("No Date")
         return false
     }
-    let dateData = "?uid=" + userId + "&track=" + trackId + "&date=" + currentDate +"&refresh_token=TESTING"
+    let dateData = "?uid=" + userId + "&track=" + trackId + "&date=" + currentDate + "&access_token=" + localStorage.getItem("access_token")
 
     //send off to mongodb
     callApi("GET", INSERTDATE + dateData, null, null)
@@ -1161,7 +1185,6 @@ window.onSpotifyPlayerAPIReady = () => {
         console.log('Ready with Device ID', data.device_id);
         web_player_id = data.device_id;
     });
-
     //console.log(userId);
 
     player.addListener('player_state_changed', ({paused, position, duration, track_window: {current_track}}) => {

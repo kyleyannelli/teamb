@@ -39,10 +39,50 @@
                 <a onclick="switchPlaylistSelection()"><li>Playlists</li></a>
                 <a onclick="switchPresentMode()"><li>Present</li></a>
                 <a onclick="switchAnnotationMode()"><li>Annotation Editor</li></a>
+                <a onclick="showSettings()"><li>Settings</li></a>
                 <a onclick="logout()"><li>Logout</li></a>
             </ul>
         </div>
     </nav>
+    <!-- The Modal -->
+    <div id="modalMenu" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span onclick="closeModal()" class="close">&times;</span>
+            <h1 style="text-align:center; color:#d3d3d3;">User Preferences</h1>
+            <h2 style="text-align: center; color:#d3d3d3;">Waveform Color:</h2>
+            <select id="waveformColorDropdown">
+                <option value="green" selected>Green</option>
+                <option value="black">Black</option>
+                <option value="orange">Orange</option>
+                <option value="blue">Blue</option>
+                <option value="red">Red</option>
+            </select>
+            <br><br>
+            <h2 style="text-align: center; color:#d3d3d3;">Annotation Color:</h2>
+            <select id="annotationColorDropdown">
+                <option value="orange" selected>Orange</option>
+                <option value="black">Black</option>
+                <option value="green">Green</option>
+                <option value="blue">Blue</option>
+                <option value="red">Red</option>
+            </select>
+            <br><br>
+            <h2 style="text-align: center; color:#d3d3d3;">Time Before Annotation:</h2>
+            <select id="timeBeforeAnnoDropdown">
+                <option value="10" selected>5 seconds</option>
+                <option value="20">10 seconds</option>
+                <option value="30">15 seconds</option>
+            </select>
+        </div>
+        <script>window.onclick = function(event) {
+            let modal = document.getElementById("modalMenu");
+            if (event.target == modal) {
+                closeModal();
+            }
+        }</script>
+    </div>
         <!--
         CURRENT SONG INFO
         -->
