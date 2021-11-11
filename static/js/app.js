@@ -82,7 +82,7 @@ function onPageLoad() {
  * switches into player mode
  */
 function switchPlayerMode() {
-    setTimeout(function() { wait() }, 400);
+    setTimeout(function() { wait() }, 500);
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
     //hide annotation editor
@@ -124,7 +124,7 @@ function switchAnnotationMode() {
     if(document.getElementById("annotationSection").style.visibility == 'hidden')
     {
         document.getElementById("annotationSection").style.visibility = 'visible';
-        document.getElementById("annotationSection").style.height = "250px";
+        document.getElementById("annotationSection").style.height = "350px";
         if(document.getElementById("presentSection").style.visibility == "hidden") {
             document.getElementById("trackInfo").setAttribute("class", "shrink");
         }
@@ -1246,6 +1246,7 @@ window.onSpotifyPlayerAPIReady = () => {
             }
             clickedRow.setAttribute("class", "active-row");
             currentIndex = clickedRow.parentElement.value;
+            clickedRow.parentElement.cells[2].innerHTML = "Today";
         }
 
         storeDate();
