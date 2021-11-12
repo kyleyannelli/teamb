@@ -45,7 +45,7 @@ var annotationColor = "orange";
 const AUTHORIZE = "https://accounts.spotify.com/authorize"
 const TOKEN = "https://accounts.spotify.com/api/token";
 const PLAYLISTS = "https://api.spotify.com/v1/me/playlists?limit=50";
-const PLAYLISTIMAGE ="https://api.spotify.com/v1/playlists/{playlist_id}/images";
+const PLAYLISTIMAGE = "https://api.spotify.com/v1/playlists/{playlist_id}/images";
 const DEVICES = "https://api.spotify.com/v1/me/player/devices";
 const PLAY = "https://api.spotify.com/v1/me/player/play";
 const PAUSE = "https://api.spotify.com/v1/me/player/pause";
@@ -71,7 +71,7 @@ function onPageLoad() {
         handleRedirect();
     } else {
         access_token = localStorage.getItem("access_token");
-        if(localStorage.getItem("userId") != null) userId = localStorage.getItem("userId");
+        if (localStorage.getItem("userId") != null) userId = localStorage.getItem("userId");
         refreshPlaylists();
         currentlyPlaying();
     }
@@ -82,7 +82,9 @@ function onPageLoad() {
  * switches into player mode
  */
 function switchPlayerMode() {
-    setTimeout(function() { wait() }, 500);
+    setTimeout(function () {
+        wait()
+    }, 500);
     //hide playlist selection
     document.getElementById("playlistSelection").style.display = 'none';
     //hide annotation editor
@@ -99,12 +101,12 @@ function switchPlayerMode() {
 
     document.body.style.backgroundImage = 'none';
     getPlaylistImage(playlistId);
-    setTimeout(function() {
+    setTimeout(function () {
         document.getElementById("albumCover").setAttribute("src", playlistImageUrl);
     }, 500);
-    setTimeout(function(){
+    setTimeout(function () {
         $("#playlistName").text(playlistName).fadeIn();
-    },500);
+    }, 500);
     //hide present
     //document.getElementById("presentSection").style.display = 'none';
     fetchTracks();
@@ -121,21 +123,19 @@ function switchAnnotationMode() {
     // document.getElementById("annotationSection").style.display = 'block';
     //removeAllItems("annotationTrack")
     //transferTracks();
-    if(document.getElementById("annotationSection").style.visibility == 'hidden')
-    {
+    if (document.getElementById("annotationSection").style.visibility == 'hidden') {
         document.getElementById("annotationSection").style.visibility = 'visible';
         document.getElementById("annotationSection").style.height = "350px";
-        if(document.getElementById("presentSection").style.visibility == "hidden") {
+        if (document.getElementById("presentSection").style.visibility == "hidden") {
             document.getElementById("trackInfo").setAttribute("class", "shrink");
         }
         setTimeout(wait, 500);
         //document.getElementById("trackArtist").style.display = "none";
         //document.getElementById("trackTitle").style.display = "none";
-    }
-    else {
+    } else {
         document.getElementById("annotationSection").style.height = "0";
         document.getElementById("annotationSection").style.visibility = 'hidden';
-        if(document.getElementById("presentSection").style.visibility == "hidden") {
+        if (document.getElementById("presentSection").style.visibility == "hidden") {
             document.getElementById("trackInfo").setAttribute("class", "grow");
         }
 
@@ -153,17 +153,52 @@ function closeModal() {
     timeBeforeAnno = document.getElementById("timeBeforeAnnoDropdown").value;
     waveformColor = document.getElementById("waveformColorDropdown").value;
     annotationColor = document.getElementById("annotationColorDropdown").value;
+    document.getElementById("shuffleOn").style.color = waveformColor;
+    changeActiveRowColor();
 }
 
-// function handleSettings() {
-//     var e = document.getElementById("waveformColorDropdown");
-//     waveformColor = e.options[e.selectedIndex].value;
-//     var e2 = document.getElementById("annotationColorDropdown");
-//     annototationColor = e2.options[e2.selectedIndex].value;
-//     var e3 = document.getElementById("timeBeforeAnnoDropdown");
-//     timeBeforeAnno = e3.options[e3.selectedIndex].value;
-// }
+function updateModal() {
+    timeBeforeAnno = document.getElementById("timeBeforeAnnoDropdown").value;
+    waveformColor = document.getElementById("waveformColorDropdown").value;
+    annotationColor = document.getElementById("annotationColorDropdown").value;
+    document.getElementById("shuffleOn").style.color = waveformColor;
+    changeActiveRowColor();
+}
 
+function changeActiveRowColor() {
+    switch (waveformColor) {
+        case "#0277bd":
+            if(clickedRow != "") {
+                clickedRow.setAttribute("class","active-row-blue");
+            }
+            document.getElementById("menuToggle").setAttribute("class", "menuToggleBlue");
+            break;
+        case "green":
+            if(clickedRow != "") {
+                clickedRow.setAttribute("class","active-row-green");
+            }
+            document.getElementById("menuToggle").setAttribute("class", "menuToggleGreen");
+            break;
+        case "black":
+            if(clickedRow != "") {
+                clickedRow.setAttribute("class","active-row-black");
+            }
+            document.getElementById("menuToggle").setAttribute("class", "menuToggleBlack");
+            break;
+        case "orange":
+            if(clickedRow != "") {
+                clickedRow.setAttribute("class","active-row-orange");
+            }
+            document.getElementById("menuToggle").setAttribute("class", "menuToggleOrange");
+            break;
+        case "red":
+            if(clickedRow != "") {
+                clickedRow.setAttribute("class","active-row-red");
+            }
+            document.getElementById("menuToggle").setAttribute("class", "menuToggleRed");
+            break;
+    }
+}
 function presentAnnotations() {
     for (let i = 0; i < currentSongAnnotations.length; i++) {
 
@@ -171,24 +206,24 @@ function presentAnnotations() {
         let splitIndex = annotation.lastIndexOf(":");
         let anno = annotation.substring(0, splitIndex);
         let timeBeforeAnnoMs = timeBeforeAnno * 1000;
-        let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length)) + timeBeforeAnnoMs/2;
+        let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length)) + timeBeforeAnnoMs / 2;
         if ((progressMs < ms) && (ms - timeBeforeAnnoMs <= progressMs)) {
-            if(document.getElementById("dotsDiv") != null) {
+            if (document.getElementById("dotsDiv") != null) {
                 document.getElementById("dotsDiv").setAttribute("class", "");
             }
             let time = Math.round(ms / 1000);
             let minutes = Math.floor(time / 60);
             let sec = time - minutes * 60 + '';
-            if(lastStoredAnno != anno) {
+            if (lastStoredAnno != anno) {
                 lastStoredAnno = anno;
             }
             document.getElementById("currentAnnotation").innerHTML = anno;
 
-            if(anno.length > 60 && anno.length < 139 && document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "220px";
-            else if(139 < anno.length  && document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "320px";
-            else if(document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "120px";
+            if (anno.length > 60 && anno.length < 139 && document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "220px";
+            else if (139 < anno.length && document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "320px";
+            else if (document.getElementById("presentSection").style.visibility == "visible") document.getElementById("presentSection").style.height = "120px";
 
-            if(currentSongAnnotations[i + 1] != null) {
+            if (currentSongAnnotations[i + 1] != null) {
                 nextAnnotation = currentSongAnnotations[i + 1];
                 let nSplitIndex = nextAnnotation.lastIndexOf(":")
                 let nextAnno = nextAnnotation.substring(0, nSplitIndex);
@@ -198,18 +233,32 @@ function presentAnnotations() {
                 let nMinutes = Math.floor(nTime / 60);
                 let nSec = nTime - nMinutes * 60 + '';
                 document.getElementById("nextAnnotation").innerHTML = nextAnno.substring(0, 10) + "...";
-            }
-            else {
+            } else {
                 document.getElementById("nextAnnotation").innerHTML = "";
             }
-        }
-        else if(i == 0){
+        } else if (i == 0) {
             //$("#currentAnnotation").text("").fadeOut();
-            if(document.getElementById("presentSection").style.visibility == "visible") {
+            if (document.getElementById("presentSection").style.visibility == "visible") {
                 document.getElementById("presentSection").style.height = "100px";
             }
             document.getElementById("currentAnnotation").innerHTML = "";
-            document.getElementById("dotsDiv").setAttribute("class", "dot-flashing");
+            switch(waveformColor) {
+                case "#0277bd":
+                    document.getElementById("dotsDiv").setAttribute("class", "dot-flashing-light-blue");
+                    break;
+                case "green":
+                    document.getElementById("dotsDiv").setAttribute("class", "dot-flashing-green");
+                    break;
+                case "black":
+                    document.getElementById("dotsDiv").setAttribute("class", "dot-flashing-black");
+                    break;
+                case "orange":
+                    document.getElementById("dotsDiv").setAttribute("class", "dot-flashing-orange");
+                    break;
+                case "red":
+                    document.getElementById("dotsDiv").setAttribute("class", "dot-flashing-red");
+                    break;
+            }
         }
         // else if(i == 0 && progressMs >= ms + 5000) {
         //     if(lastStoredAnno == anno) break;
@@ -228,6 +277,7 @@ function presentAnnotations() {
     }
 
 }
+
 function wait() {
 
 }
@@ -237,12 +287,11 @@ function switchPresentMode() {
     //document.getElementById("playerSection").style.display = 'none';
     //hide playlist selection
     // setTimeout(fetchAnnotations, 500);
-    if(document.getElementById("presentSection").style.visibility == 'hidden')
-    {
+    if (document.getElementById("presentSection").style.visibility == 'hidden') {
         document.getElementById("presentSection").style.visibility = 'visible';
         document.getElementById("presentSection").style.height = "100px";
 
-        if(document.getElementById("annotationSection").style.visibility == "hidden") {
+        if (document.getElementById("annotationSection").style.visibility == "hidden") {
             document.getElementById("trackInfo").setAttribute("class", "shrink");
         }
 
@@ -250,11 +299,10 @@ function switchPresentMode() {
         //document.getElementById("trackArtist").style.display = "none";
         //document.getElementById("trackTitle").style.display = "none";
         setTimeout(wait, 500);
-    }
-    else {
+    } else {
         document.getElementById("presentSection").style.height = "0px";
         document.getElementById("presentSection").style.visibility = 'hidden'
-        if(document.getElementById("annotationSection").style.visibility == "hidden") {
+        if (document.getElementById("annotationSection").style.visibility == "hidden") {
             document.getElementById("trackInfo").setAttribute("class", "grow");
         }
 
@@ -268,14 +316,13 @@ function switchPresentMode() {
 
     clearInterval(annotationInterval);
 
-    annotationInterval = setInterval(function() {
-        if(currentSongId != trackId){
+    annotationInterval = setInterval(function () {
+        if (currentSongId != trackId) {
             currentSongId = trackId;
             fetchAnnotations();
         }
         presentAnnotations();
-        if(document.getElementById("presentSection").style.display == 'none')
-        {
+        if (document.getElementById("presentSection").style.display == 'none') {
             clearInterval(annotationInterval);
         }
     }, 1000);
@@ -300,10 +347,9 @@ function switchPlaylistSelection() {
 }
 
 function controlMenu() {
-    if(document.getElementById("navBar").style.left == "0px") {
+    if (document.getElementById("navBar").style.left == "0px") {
         document.getElementById("navBar").style = "left: -100px;";
-    }
-    else {
+    } else {
         document.getElementById("navBar").style.left = "0";
     }
 }
@@ -362,13 +408,13 @@ function handleAuthorizationResponse() {
             localStorage.setItem("refresh_token", refresh_token);
         }
 
-        if(userId == "" || userId == null) {
-            setTimeout(function (){
+        if (userId == "" || userId == null) {
+            setTimeout(function () {
                 callApi("GET", USER, null, handleUserIdResponse);
             }, 1000);
         }
 
-        if(!(document.getElementById("playerSection").style.display == "block")) {
+        if (!(document.getElementById("playerSection").style.display == "block")) {
             onPageLoad();
         }
     } else {
@@ -379,9 +425,8 @@ function handleAuthorizationResponse() {
 
 function refreshAccessToken() {
     refresh_token = localStorage.getItem("refresh_token");
-    callApi("POST", REFRESHTEAMB +"?uid="+ userId + "&rt=" + refresh_token, null, handleAuthorizationResponse);
+    callApi("POST", REFRESHTEAMB + "?uid=" + userId + "&rt=" + refresh_token, null, handleAuthorizationResponse);
 }
-
 
 
 /**
@@ -440,7 +485,7 @@ function handlePlaylistClick() {
     playlistId = event.target.parentElement.value;
     //console.log(playlistId);
     // console.log(playlistId.value);
-    setTimeout(function() {
+    setTimeout(function () {
         switchPlayerMode();
     }, 500);
 
@@ -472,8 +517,7 @@ function storeAnnotation() {
     if (annotation == '' || min == '' || sec == '') {
         alert("Please enter both the annotation and timestamp.")
         return false
-    }
-    else if (!(min >= 0) || !(sec >= 0 && sec <= 59)) {
+    } else if (!(min >= 0) || !(sec >= 0 && sec <= 59)) {
         alert("Please enter a valid time.");
         return false;
     }
@@ -547,7 +591,7 @@ function handleUserIdResponse() {
 
 function fetchAnnotations() {
     //let dropdown = document.getElementById("tracks");
-    let trackIndex =  currentIndex;//dropdown.options[dropdown.selectedIndex].value;
+    let trackIndex = currentIndex;//dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
     if (trackIndex > 99) {
         arrayIndex = trackIndex.charAt(0);
@@ -583,9 +627,9 @@ function addAnnotations(annotation, seconds) {
 
     let time = Math.round(seconds / 1000);
     let minutes = Math.floor(time / 60);
-    let sec = time - minutes * 60 +'';
+    let sec = time - minutes * 60 + '';
 
-    let convertedTime = document.createTextNode(minutes + ":" + sec.padStart(2,'0'));
+    let convertedTime = document.createTextNode(minutes + ":" + sec.padStart(2, '0'));
     td1.appendChild(newAnno);
     td2.appendChild(convertedTime);
 
@@ -595,7 +639,6 @@ function addAnnotations(annotation, seconds) {
     currentSongAnnotations.push(annotation + ":" + seconds);
     document.getElementById("songAnnotations").appendChild(node);
 }
-
 
 
 function addTrackAnnotation(item, index) {
@@ -613,6 +656,10 @@ function shuffle() {
     callApi("PUT", SHUFFLE + "?state=true&device_id=" + web_player_id, null, handleApiResponse);
 }
 
+function shuffleOff() {
+    callApi("PUT", SHUFFLE + "?state=false&device_id=" + web_player_id, null, handleApiResponse);
+}
+
 /**
  * plays song from beginning or resumes
  */
@@ -626,8 +673,9 @@ function play(index) {
 }
 
 function handleRowTrackClick() {
-    if(clickedRow != null && clickedRow != "") clickedRow.setAttribute("class", "");
+    if (clickedRow != null && clickedRow != "") clickedRow.setAttribute("class", "");
     clickedRow = event.target;
+    changeActiveRowColor();
     clickedRow.parentElement.cells[2].innerHTML = "Today";
     play(clickedRow.parentElement.value);
 }
@@ -680,12 +728,11 @@ function getPlaylistImage(id) {
     callApi("GET", updatedUrl, null, handlePlaylistImage);
 }
 
-function handlePlaylistImage(){
-    if(this.status == 200) {
+function handlePlaylistImage() {
+    if (this.status == 200) {
         var data = JSON.parse(this.responseText);
         playlistImageUrl = data[0].url;
-    }
-    else {
+    } else {
         console.log(this.responseText);
     }
 }
@@ -728,11 +775,11 @@ function setAnnotationFields() {
     let storedMs = annotationTable.id;
     var timePro = Math.round(storedMs / 1000);
     var minutesPro = Math.floor(timePro / 60);
-    var secPro = timePro - minutesPro * 60 +'';
+    var secPro = timePro - minutesPro * 60 + '';
     document.getElementById("annotationText").value = text;
     // document.getElementById("annotationText").value = minutesPro + ":" + secPro.padStart(2,'0');
     document.getElementById("annotationMin").value = minutesPro;
-    document.getElementById("annotationSec").value = secPro.padStart(2,'0');
+    document.getElementById("annotationSec").value = secPro.padStart(2, '0');
     seek(storedMs);
 }
 
@@ -750,7 +797,7 @@ function fetchTracks() {
         let url = TRACKS.replace("{{PlaylistId}}", playlistId);
         //reset jsonarray here otherwise the previous playlists would still be stored
         jsonArray = [];
-        callApi("GET", RETRIEVEDATES + "?uid=" + userId + "&access_token="+ localStorage.getItem("access_token"), null, handleDatesResponse);
+        callApi("GET", RETRIEVEDATES + "?uid=" + userId + "&access_token=" + localStorage.getItem("access_token"), null, handleDatesResponse);
         setTimeout(function () {
             callApi("GET", url, null, handleTracksResponse);
         }, 200);
@@ -761,7 +808,7 @@ function fetchTracks() {
 function handleDatesResponse() {
     if (this.status == 200) {
         let localUID = localStorage.getItem("userId");
-        if(localUID != null) userId = localUID;
+        if (localUID != null) userId = localUID;
         currentPlaylistDates = [];
         var data = JSON.parse(this.responseText);
         // console.log(data);
@@ -770,8 +817,7 @@ function handleDatesResponse() {
             currentPlaylistDates.push({[key]: data[key]});
         }
 
-    }
-    else{
+    } else {
         console.log(this.responseText)
     }
 }
@@ -805,25 +851,23 @@ function addTrack(item, index) {
         let td2 = document.createElement("td");
         let td3 = document.createElement("td");
 
-        let trackName = document.createTextNode(item.track.name) ;
+        let trackName = document.createTextNode(item.track.name);
         let artist = document.createTextNode(item.track.artists[0].name);
         let lastPlayed = document.createTextNode("Never Played");
-        for(let i in currentPlaylistDates) {
-            if(currentPlaylistDates[i][item.track.id] != undefined) {
+        for (let i in currentPlaylistDates) {
+            if (currentPlaylistDates[i][item.track.id] != undefined) {
                 let today = new Date();
                 let oldDate = new Date(currentPlaylistDates[i][item.track.id]);
                 let msInDay = 24 * 60 * 60 * 1000;
-                today.setHours(0,0,0,0);
-                oldDate.setHours(0,0,0,0)
-                let diff = (+today - +oldDate)/msInDay
+                today.setHours(0, 0, 0, 0);
+                oldDate.setHours(0, 0, 0, 0)
+                let diff = (+today - +oldDate) / msInDay
                 let floorDiff = Math.floor(diff);
-                if(diff == 0) {
+                if (diff == 0) {
                     lastPlayed = document.createTextNode("Today");
-                }
-                else if(diff == 1) {
+                } else if (diff == 1) {
                     lastPlayed = document.createTextNode(floorDiff + " Day Ago");
-                }
-                else {
+                } else {
                     lastPlayed = document.createTextNode(floorDiff + " Days Ago");
                 }
             }
@@ -855,22 +899,24 @@ function handleCurrentlyPlayingResponse() {
         var data = JSON.parse(this.responseText);
         if (data.item != null && document.getElementById("playlistSelection").style.display != "block") {
             //call analyze
-            if(currentWaveformId !== data.item.id) { getTrackAnalysis(data.item.id); }
+            if (currentWaveformId !== data.item.id) {
+                getTrackAnalysis(data.item.id);
+            }
 
-            if(currentAlbumCover != data.item.album.images[0].url) {
-                $("#albumCover").fadeOut(function() {
+            if (currentAlbumCover != data.item.album.images[0].url) {
+                $("#albumCover").fadeOut(function () {
                     $(this).attr("src", data.item.album.images[0].url).fadeIn();
                 });
                 currentAlbumCover = data.item.album.images[0].url;
             }
-            if(currentTrackTitle != data.item.name) {
-                $("#trackTitle").fadeOut(function() {
+            if (currentTrackTitle != data.item.name) {
+                $("#trackTitle").fadeOut(function () {
                     $(this).text(data.item.name).fadeIn();
                 });
                 currentTrackTitle = data.item.name;
             }
-            if(currentTrackArtist != data.item.artists[0].name) {
-                $("#trackArtist").fadeOut(function() {
+            if (currentTrackArtist != data.item.artists[0].name) {
+                $("#trackArtist").fadeOut(function () {
                     $(this).text(data.item.artists[0].name).fadeIn();
                 });
                 currentTrackArtist = data.item.artists[0].name;
@@ -970,8 +1016,7 @@ function analyzeWaveform() {
             showProgress();
             drawWaveformsHandler(levels);
         }
-    }
-    else if(this.status == 401) {
+    } else if (this.status == 401) {
         refreshAccessToken();
     }
 }
@@ -979,7 +1024,7 @@ function analyzeWaveform() {
 function drawWaveformsHandler(levelsData) {
     clearInterval(intervalId);
 
-    intervalId = setInterval(function() {
+    intervalId = setInterval(function () {
         drawWaveform(levelsData, "canvasBg", -2500)
         drawWaveforms(levelsData);
     }, 1000);
@@ -989,7 +1034,7 @@ function drawWaveformsHandler(levelsData) {
 function drawWaveforms(data) {
     let elementTop = document.getElementById("canvasTop")
     let elementBottom = document.getElementById("canvasBottom")
-    if(waveformTop) {
+    if (waveformTop) {
         drawWaveform(data, "canvasTop", -1000)
         drawWaveform(data, "canvasBottom", 0)
         /**
@@ -999,7 +1044,7 @@ function drawWaveforms(data) {
         var opOut = 1;  // initial opacity
         var opIn = 0;  // initial opacity
         waveformTimer = setInterval(function () {
-            if (opOut == 0 || opIn == 1){
+            if (opOut == 0 || opIn == 1) {
                 clearInterval(waveformTimer);
             }
             elementBottom.style.opacity = opOut;
@@ -1007,10 +1052,10 @@ function drawWaveforms(data) {
             opOut -= .01;
             elementTop.style.opacity = opIn;
             elementTop.style.filter = 'alpha(opacity=' + opIn + ")";
-            opIn += .01;}, 10);
+            opIn += .01;
+        }, 10);
         waveformTop = false;
-    }
-    else {
+    } else {
         drawWaveform(data, "canvasTop", 0)
         drawWaveform(data, "canvasBottom", -1000)
         /**
@@ -1020,7 +1065,7 @@ function drawWaveforms(data) {
         var opOut = 1;  // initial opacity
         var opIn = 0;  // initial opacity
         waveformTimer = setInterval(function () {
-            if (opOut == 0 || opIn == 1){
+            if (opOut == 0 || opIn == 1) {
                 clearInterval(waveformTimer);
             }
             elementTop.style.opacity = opOut;
@@ -1028,7 +1073,8 @@ function drawWaveforms(data) {
             opOut -= .01;
             elementBottom.style.opacity = opIn;
             elementBottom.style.filter = 'alpha(opacity=' + opIn + ")";
-            opIn += .01;}, 10);
+            opIn += .01;
+        }, 10);
         waveformTop = true;
     }
 
@@ -1039,7 +1085,7 @@ function drawWaveforms(data) {
  * Data is the array of points.
  */
 function drawWaveform(data, id, offset) {
-    if(lastPlayedSongId != trackId) {
+    if (lastPlayedSongId != trackId) {
         currentMarkedAnnotations = new Map();
     }
     let canvas = document.getElementById(id);
@@ -1056,17 +1102,16 @@ function drawWaveform(data, id, offset) {
 
             let h = Math.round(data[i] * height) / 2;
 
-            if(offset == -1) {
+            if (offset == -1) {
                 fill = "white"
-            }
-            else {
+            } else {
                 let check = false;
-                if(currentSongAnnotations != null &&
+                if (currentSongAnnotations != null &&
                     document.getElementById("presentSection").style.visibility == "visible" ||
                     document.getElementById("annotationSection").style.visibility == "visible") {
                     let firstAnno = currentSongAnnotations[0].substring(0, currentSongAnnotations[0].lastIndexOf(":"));
-                    if(!(firstAnno == "You have no annotations for this song!")) {
-                        for(let a = 0; a < currentSongAnnotations.length; a++) {
+                    if (!(firstAnno == "You have no annotations for this song!")) {
+                        for (let a = 0; a < currentSongAnnotations.length; a++) {
                             let annotation = currentSongAnnotations[a];
                             let splitIndex = annotation.lastIndexOf(":");
                             let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length))
@@ -1080,8 +1125,7 @@ function drawWaveform(data, id, offset) {
                 }
                 if (check) {
                     fill = annotationColor;
-                }
-                else if ((x / width) < ((progressMs - offset) / currentDuration)) {
+                } else if ((x / width) < ((progressMs - offset) / currentDuration)) {
                     fill = waveformColor;
                 } else {
                     fill = "#d3d3d3"
@@ -1108,10 +1152,10 @@ function handleWaveformClick() {
     seek((positionPercentage * currentDuration));
     drawWaveformsHandler(currentTrackLevels);
 
-    setTimeout(function(){
+    setTimeout(function () {
         var timePro = Math.round(progressMs / 1000);
         var minutesPro = Math.floor(timePro / 60);
-        var secPro = timePro - minutesPro * 60 +'';
+        var secPro = timePro - minutesPro * 60 + '';
         // document.getElementById("annotationTime").value = minutesPro + ":" + secPro.padStart(2,'0');
         document.getElementById("annotationMin").value = minutesPro;
         document.getElementById("annotationSec").value = secPro.padStart(2, '0');
@@ -1121,20 +1165,20 @@ function handleWaveformClick() {
 /**
  * Show song progress and duration in numbers
  */
-function showProgress(){
+function showProgress() {
     var timeDur = Math.round(currentDuration / 1000);
     var minutesDur = Math.floor(timeDur / 60);
-    var secDur = timeDur - minutesDur * 60 +'';
+    var secDur = timeDur - minutesDur * 60 + '';
 
-    document.getElementById("duration").innerHTML = minutesDur + ":" + secDur.padStart(2,'0');
+    document.getElementById("duration").innerHTML = minutesDur + ":" + secDur.padStart(2, '0');
 
     clearInterval(progressTimer);
 
     progressTimer = setInterval(function () {
         var timePro = Math.round(progressMs / 1000);
         var minutesPro = Math.floor(timePro / 60);
-        var secPro = timePro - minutesPro * 60 +'';
-        document.getElementById("progress").innerHTML = minutesPro + ":" + secPro.padStart(2,'0');
+        var secPro = timePro - minutesPro * 60 + '';
+        document.getElementById("progress").innerHTML = minutesPro + ":" + secPro.padStart(2, '0');
     })
 }
 
@@ -1142,13 +1186,13 @@ function showProgress(){
  *Get Date
  *
  */
- function getDate(){
-     let date = new Date();
-     let day = date.getDate();
-     let month = date.getMonth()+1;
-     let year = date.getFullYear();
-     currentDate = month+"/"+day+"/"+year;
- }
+function getDate() {
+    let date = new Date();
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+    currentDate = month + "/" + day + "/" + year;
+}
 
 function storeDate() {
     getDate();
@@ -1187,12 +1231,16 @@ window.onSpotifyPlayerAPIReady = () => {
     });
     //console.log(userId);
 
+
+
+
+
     player.addListener('player_state_changed', ({paused, position, duration, track_window: {current_track}}) => {
-        for(let i in currentPlaylistJson) {
-            if(currentPlaylistJson[i][i] == trackId) currentIndex = i;
+        for (let i in currentPlaylistJson) {
+            if (currentPlaylistJson[i][i] == trackId) currentIndex = i;
         }
 
-        if(document.getElementById("timeStamps").style.visibility == 'hidden') {
+        if (document.getElementById("timeStamps").style.visibility == 'hidden') {
             $("#playlistName").text(playlistName).fadeOut();
             document.getElementById("trackTitle").innerHTML = "";
             document.getElementById("trackArtist").innerHTML = "";
@@ -1206,47 +1254,63 @@ window.onSpotifyPlayerAPIReady = () => {
             document.getElementById("buttonArea").style.height = "50px";
         }
 
+        player.getCurrentState().then(state => {
+            if (!state) {
+                console.error('User is not playing music through the Web Playback SDK');
+                return;
+            }
+            let shuffleStatus = state.shuffle;
+            if (shuffleStatus == false) {
+                document.getElementById("shuffleOff").style.display = 'block';
+                document.getElementById("shuffleOn").style.display = 'none';
+            } else {
+                document.getElementById("shuffleOn").style.display = 'block';
+                document.getElementById("shuffleOff").style.display = 'none';
+            }
+        });
+
+
         progressMs = position;
         clearInterval(playerInterval)
         isPaused = paused;
-        if(isPaused){
+        if (isPaused) {
             document.getElementById("playPause").style.display = 'contents';
             document.getElementById("pausePlay").style.display = 'none';
-        }
-        else {
+        } else {
             document.getElementById("pausePlay").style.display = 'contents';
             document.getElementById("playPause").style.display = 'none';
         }
 
-        playerInterval = setInterval(function() {
+        playerInterval = setInterval(function () {
             progressMs += paused ? 0 : 1000;
         }, 1000);
         currentDuration = duration;
-        if(trackId != current_track.id){
+        if (trackId != current_track.id) {
             nextAnnotation = "";
             document.getElementById("nextAnnotation").innerHTML = "";
         }
         trackId = current_track.id
         currentPlayingObject = current_track;
         currentlyPlaying();
-        for(let i in currentPlaylistJson) {
-            if(currentPlaylistJson[i][i] == trackId) document.getElementById("tracks").value = i;
-            if(currentPlaylistJson[i][i] == current_track.linked_from.id) document.getElementById("tracks").value = i;
+        for (let i in currentPlaylistJson) {
+            if (currentPlaylistJson[i][i] == trackId) document.getElementById("tracks").value = i;
+            if (currentPlaylistJson[i][i] == current_track.linked_from.id) document.getElementById("tracks").value = i;
         }
 
 
-        if(clickedRow != null) {
-            if(clickedRow != "") {
+        if (clickedRow != null) {
+            if (clickedRow != "") {
                 clickedRow.setAttribute("class", "");
             }
             clickedRow = document.getElementById(trackId);
-            if(clickedRow == null) {
+            if (clickedRow == null) {
                 clickedRow = document.getElementById(current_track.linked_from.id);
                 trackId = current_track.linked_from.id;
             }
-            clickedRow.setAttribute("class", "active-row");
+            // clickedRow.setAttribute("class", "active-row");
+            changeActiveRowColor();
             currentIndex = clickedRow.parentElement.value;
-            clickedRow.parentElement.cells[2].innerHTML = "Today";
+            clickedRow.cells[2].innerHTML = "Today";
         }
 
         storeDate();

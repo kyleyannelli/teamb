@@ -19,47 +19,47 @@ html {
  * Released under the MIT license
  * ==============================================
  */
-.dot-flashing {
+.dot-flashing-green {
     position: absolute;
     width: 10px;
     height: 10px;
     border-radius: 5px;
     background-color: green;
     color: green;
-    animation: dotFlashing 1s infinite linear alternate;
+    animation: dotFlashingGreen 1s infinite linear alternate;
     animation-delay: .5s;
 }
 
-.dot-flashing::before, .dot-flashing::after {
+.dot-flashing-green::before, .dot-flashing-green::after {
     content: '';
     display: inline-block;
     position: absolute;
     top: 0;
 }
 
-.dot-flashing::before {
+.dot-flashing-green::before {
     left: -15px;
     width: 10px;
     height: 10px;
     border-radius: 5px;
     background-color: green;
     color: green;
-    animation: dotFlashing 1s infinite alternate;
+    animation: dotFlashingGreen 1s infinite alternate;
     animation-delay: 0s;
 }
 
-.dot-flashing::after {
+.dot-flashing-green::after {
     left: 15px;
     width: 10px;
     height: 10px;
     border-radius: 5px;
     background-color: green;
     color: green;
-    animation: dotFlashing 1s infinite alternate;
+    animation: dotFlashingGreen 1s infinite alternate;
     animation-delay: 1s;
 }
 
-@keyframes dotFlashing {
+@keyframes dotFlashingGreen {
     0% {
         background-color: green;
     }
@@ -69,6 +69,205 @@ html {
     }
 }
 
+.dot-flashing-black {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: black;
+    color: black;
+    animation: dotFlashingBlack 1s infinite linear alternate;
+    animation-delay: .5s;
+}
+
+.dot-flashing-black::before, .dot-flashing-black::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    top: 0;
+}
+
+.dot-flashing-black::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: black;
+    color: black;
+    animation: dotFlashingBlack 1s infinite alternate;
+    animation-delay: 0s;
+}
+
+.dot-flashing-black::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: black;
+    color: black;
+    animation: dotFlashingBlack 1s infinite alternate;
+    animation-delay: 1s;
+}
+
+@keyframes dotFlashingBlack {
+    0% {
+        background-color: black;
+    }
+    50%,
+    100% {
+        background-color: #d3d3d3;
+    }
+}
+
+.dot-flashing-light-blue {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #0277bd;
+    color: #0277bd;
+    animation: dotFlashingLightBlue 1s infinite linear alternate;
+    animation-delay: .5s;
+}
+
+.dot-flashing-light-blue::before, .dot-flashing-light-blue::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    top: 0;
+}
+
+.dot-flashing-light-blue::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #0277bd;
+    color: #0277bd;
+    animation: dotFlashingLightBlue 1s infinite alternate;
+    animation-delay: 0s;
+}
+
+.dot-flashing-light-blue::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #0277bd;
+    color: #0277bd;
+    animation: dotFlashingLightBlue 1s infinite alternate;
+    animation-delay: 1s;
+}
+
+@keyframes dotFlashingLightBlue {
+    0% {
+        background-color: #0277bd;
+    }
+    50%,
+    100% {
+        background-color: #d3d3d3;
+    }
+}
+
+.dot-flashing-orange {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: orange;
+    color: orange;
+    animation: dotFlashingOrange 1s infinite linear alternate;
+    animation-delay: .5s;
+}
+
+.dot-flashing-orange::before, .dot-flashing-orange::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    top: 0;
+}
+
+.dot-flashing-orange::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: orange;
+    color: orange;
+    animation: dotFlashingOrange 1s infinite alternate;
+    animation-delay: 0s;
+}
+
+.dot-flashing-orange::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: orange;
+    color: orange;
+    animation: dotFlashingOrange 1s infinite alternate;
+    animation-delay: 1s;
+}
+
+@keyframes dotFlashingOrange {
+    0% {
+        background-color: orange;
+    }
+    50%,
+    100% {
+        background-color: #d3d3d3;
+    }
+}
+
+.dot-flashing-red {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: red;
+    color: red;
+    animation: dotFlashingRed 1s infinite linear alternate;
+    animation-delay: .5s;
+}
+
+.dot-flashing-red::before, .dot-flashing-red::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    top: 0;
+}
+
+.dot-flashing-red::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: red;
+    color: red;
+    animation: dotFlashingRed 1s infinite alternate;
+    animation-delay: 0s;
+}
+
+.dot-flashing-red::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: red;
+    color: red;
+    animation: dotFlashingRed 1s infinite alternate;
+    animation-delay: 1s;
+}
+
+@keyframes dotFlashingRed {
+    0% {
+        background-color: red;
+    }
+    50%,
+    100% {
+        background-color: #d3d3d3;
+    }
+}
 
 .shrink {
     -webkit-transition-property: -webkit-transform;
@@ -377,8 +576,25 @@ html {
     border-bottom: 2px solid black;
 }
 
-.prettyTable tbody tr.active-row {
+.prettyTable tbody tr.active-row-green {
     color: green;
+}
+
+.prettyTable tbody tr.active-row-black {
+    color: black;
+    font-weight: bold;
+}
+
+.prettyTable tbody tr.active-row-orange {
+    color: orange;
+}
+
+.prettyTable tbody tr.active-row-blue {
+    color: #0277bd;
+}
+
+.prettyTable tbody tr.active-row-red {
+    color: red;
 }
 
 #currentAnnotation {
@@ -523,15 +739,51 @@ html {
 
 #waveformColorDropdown {
     text-align: center;
+    width: 50%;
+    height: 10%;
+    font-size: 100%;
+    border-color: #333333;
+    border-bottom-color: #d3d3d3;
+    background-color: #333333;
+    color: #d3d3d3;
+    -webkit-appearance: none;
 
+}
+
+#waveformColorDropdown:hover{
+    cursor: pointer;
 }
 
 #annotationColorDropdown {
     text-align: center;
+    width: 50%;
+    height: 10%;
+    font-size: 100%;
+    border-color: #333333;
+    border-bottom-color: #d3d3d3;
+    background-color: #333333;
+    color: #d3d3d3;
+    -webkit-appearance: none;
+}
+
+#annotationColorDropdown:hover{
+    cursor: pointer;
 }
 
 #timeBeforeAnnoDropdown {
     text-align: center;
+    width: 50%;
+    height: 10%;
+    font-size: 100%;
+    border-color: #333333;
+    border-bottom-color: #d3d3d3;
+    background-color: #333333;
+    color: #d3d3d3;
+    -webkit-appearance: none;
+}
+
+#timeBeforeAnnoDropdown:hover{
+    cursor: pointer;
 }
 
 /*NAV BAR START*/
@@ -559,6 +811,31 @@ html {
 #menuToggle a:hover
 {
     color: green;
+}
+
+.menuToggleBlack a:hover
+{
+    color: black !important;
+}
+
+.menuToggleBlue a:hover
+{
+    color: #0277bd !important;
+}
+
+.menuToggleGreen a:hover
+{
+    color: green !important;
+}
+
+.menuToggleOrange a:hover
+{
+    color: orange !important;
+}
+
+.menuToggleRed a:hover
+{
+    color: red !important;
 }
 
 
@@ -702,7 +979,7 @@ html {
     padding: 20px;
     border: 1px solid #888;
     width: 40%;
-    height: 50%;
+    height: 70%;
 }
 
 /* The Close Button */
