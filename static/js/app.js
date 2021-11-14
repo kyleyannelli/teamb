@@ -36,11 +36,15 @@ var currentAlbumCover = "";
 var currentTrackTitle = "";
 var currentTrackArtist = "";
 var currentMarkedAnnotations = new Map();
+var queueTracksMap = new Map();
 var lastPlayedSongId = "";
 var nextAnnotation = "";
-var waveformColor = "green";
+var waveformColor = "#ff7700";
 var timeBeforeAnno = 5;
-var annotationColor = "orange";
+var timeAfterAnno = 5;
+var annotationColor = "black";
+var firstSongPlayed = true;
+var playerReady = false;
 
 const AUTHORIZE = "https://accounts.spotify.com/authorize"
 const TOKEN = "https://accounts.spotify.com/api/token";
@@ -83,35 +87,39 @@ function onPageLoad() {
  * switches into player mode
  */
 function switchPlayerMode() {
-    setTimeout(function () {
-        wait()
-    }, 500);
-    //hide playlist selection
-    document.getElementById("playlistSelection").style.display = 'none';
-    //hide annotation editor
-    //show player stuff
-    document.getElementById("trackTitle").style.visibility = 'hidden';
-    document.getElementById("playerSection").style.display = 'block';
-    document.getElementById("trackArtist").style.visibility = 'hidden';
-    document.getElementById("timeStamps").style.visibility = 'hidden';
-    document.getElementById("timeStamps").style.height = "0px";
-    document.getElementById("waveformDiv").style.visibility = 'hidden';
-    document.getElementById("waveformDiv").style.height = "0px";
-    document.getElementById("buttonArea").style.visibility = 'hidden';
-    document.getElementById("buttonArea").style.height = "0px";
+    if(playerReady)
+    {
+        setTimeout(function () {
+            wait()
+        }, 500);
+        //hide playlist selection
+        document.getElementById("playlistSelection").style.display = 'none';
+        //hide annotation editor
+        //show player stuff
+        document.getElementById("trackTitle").style.visibility = 'hidden';
+        document.getElementById("playerSection").style.display = 'block';
+        document.getElementById("trackArtist").style.visibility = 'hidden';
+        document.getElementById("timeStamps").style.visibility = 'hidden';
+        document.getElementById("timeStamps").style.height = "0px";
+        document.getElementById("waveformDiv").style.visibility = 'hidden';
+        document.getElementById("waveformDiv").style.height = "0px";
+        document.getElementById("buttonArea").style.visibility = 'hidden';
+        document.getElementById("buttonArea").style.height = "0px";
 
-    document.body.style.backgroundImage = 'none';
-    getPlaylistImage(playlistId);
-    setTimeout(function () {
-        document.getElementById("albumCover").setAttribute("src", playlistImageUrl);
-    }, 500);
-    setTimeout(function () {
-        $("#playlistName").text(playlistName).fadeIn();
-    }, 500);
-    //hide present
-    //document.getElementById("presentSection").style.display = 'none';
-    fetchTracks();
-    progressMs = 0;
+        document.body.style.backgroundImage = 'none';
+        getPlaylistImage(playlistId);
+        setTimeout(function () {
+            document.getElementById("albumCover").setAttribute("src", playlistImageUrl);
+        }, 500);
+        setTimeout(function () {
+            $("#playlistName").text(playlistName).fadeIn();
+        }, 500);
+        //hide present
+        //document.getElementById("presentSection").style.display = 'none';
+        fetchTracks();
+        progressMs = 0;
+        firstSongPlayed = true;
+    }
 }
 
 /**
@@ -152,6 +160,7 @@ function showSettings() {
 function closeModal() {
     document.getElementById("modalMenu").style.display = 'none';
     timeBeforeAnno = document.getElementById("timeBeforeAnnoDropdown").value;
+    timeAfterAnno = document.getElementById("timeAfterAnnoDropdown").value;
     waveformColor = document.getElementById("waveformColorDropdown").value;
     annotationColor = document.getElementById("annotationColorDropdown").value;
     document.getElementById("shuffleOn").style.color = waveformColor;
@@ -161,6 +170,7 @@ function closeModal() {
 function updateModal() {
     timeBeforeAnno = document.getElementById("timeBeforeAnnoDropdown").value;
     waveformColor = document.getElementById("waveformColorDropdown").value;
+    timeAfterAnno = document.getElementById("timeAfterAnnoDropdown").value;
     annotationColor = document.getElementById("annotationColorDropdown").value;
     document.getElementById("shuffleOn").style.color = waveformColor;
     changeActiveRowColor();
@@ -186,7 +196,7 @@ function changeActiveRowColor() {
             }
             document.getElementById("menuToggle").setAttribute("class", "menuToggleBlack");
             break;
-        case "orange":
+        case "#ff7700":
             if(clickedRow != "") {
                 clickedRow.setAttribute("class","active-row-orange");
             }
@@ -206,9 +216,11 @@ function presentAnnotations() {
         let annotation = currentSongAnnotations[i];
         let splitIndex = annotation.lastIndexOf(":");
         let anno = annotation.substring(0, splitIndex);
-        let timeBeforeAnnoMs = timeBeforeAnno * 1000;
-        let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length)) + timeBeforeAnnoMs / 2;
-        if ((progressMs < ms) && (ms - timeBeforeAnnoMs <= progressMs)) {
+        //these are swapped in relation to the global and html idk it just works
+        let timeBeforeAnnoMs = timeAfterAnno * 1000;
+        let timeAfterAnnoMs = timeBeforeAnno * 1000;
+        let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length)) + timeBeforeAnnoMs;
+        if ((progressMs < ms) && (ms - (timeBeforeAnnoMs + timeAfterAnnoMs) <= progressMs)) {
             if (document.getElementById("dotsDiv") != null) {
                 document.getElementById("dotsDiv").setAttribute("class", "");
             }
@@ -253,7 +265,7 @@ function presentAnnotations() {
                 case "black":
                     document.getElementById("dotsDiv").setAttribute("class", "dot-flashing-black");
                     break;
-                case "orange":
+                case "#ff7700":
                     document.getElementById("dotsDiv").setAttribute("class", "dot-flashing-orange");
                     break;
                 case "red":
@@ -683,7 +695,27 @@ function handleRowTrackClick() {
 
 function handleQueueClick() {
     let desiredQueueTrackId = event.target.parentElement.parentElement.id;
+    event.target.setAttribute("class", "fa fa-check");
+    event.target.setAttribute("onclick", "");
     addToQueue(desiredQueueTrackId);
+
+    let node = document.createElement("tr");
+    node.value = event.target.parentElement.parentElement.value;
+    node.id = event.target.parentElement.parentElement.id;
+
+    let td1 = document.createElement("td");
+    let td2 = document.createElement("td");
+    let trackName = document.createTextNode(event.target.parentElement.parentElement.cells[0].innerHTML);
+    let artist = document.createTextNode(event.target.parentElement.parentElement.cells[1].innerHTML);
+
+    td1.appendChild(trackName);
+    td2.appendChild(artist);
+
+    node.appendChild(td1);
+    node.appendChild(td2);
+    document.getElementById("queueTracks").appendChild(node);
+    queueTracksMap.set(event.target.parentElement.parentElement.id, true);
+
 }
 
 /**
@@ -736,6 +768,64 @@ function getPlaylistImage(id) {
     let updatedUrl = PLAYLISTIMAGE.replace("{playlist_id}", id);
     //console.log(updatedUrl);
     callApi("GET", updatedUrl, null, handlePlaylistImage);
+}
+
+function handleQueueList() {
+    let queueDiv = document.getElementById("queueDiv");
+    if(queueDiv.style.visibility == 'hidden') {
+        queueDiv.style.visibility = "visible";
+        $("#queueDiv").fadeIn(function() {
+
+        });
+        // Make the DIV element draggable:
+        dragElement(document.getElementById("queueDiv"));
+
+        function dragElement(elmnt) {
+            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            if (document.getElementById(elmnt.id + "Header")) {
+                // if present, the header is where you move the DIV from:
+                document.getElementById(elmnt.id + "Header").onmousedown = dragMouseDown;
+            } else {
+                // otherwise, move the DIV from anywhere inside the DIV:
+                elmnt.onmousedown = dragMouseDown;
+            }
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // get the mouse cursor position at startup:
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                // call a function whenever the cursor moves:
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // calculate the new cursor position:
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                // set the element's new position:
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                // stop moving when mouse button is released:
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+    }
+    else {
+        $("#queueDiv").fadeOut(function() {
+            queueDiv.style.visibility = "hidden";
+        });
+    }
 }
 
 function handlePlaylistImage() {
@@ -1244,6 +1334,7 @@ window.onSpotifyPlayerAPIReady = () => {
     player.on('ready', data => {
         console.log('Ready with Device ID', data.device_id);
         web_player_id = data.device_id;
+        playerReady = true;
     });
     //console.log(userId);
 
@@ -1277,10 +1368,10 @@ window.onSpotifyPlayerAPIReady = () => {
             }
             let shuffleStatus = state.shuffle;
             if (shuffleStatus == false) {
-                document.getElementById("shuffleOff").style.display = 'block';
+                document.getElementById("shuffleOff").style.display = 'initial';
                 document.getElementById("shuffleOn").style.display = 'none';
             } else {
-                document.getElementById("shuffleOn").style.display = 'block';
+                document.getElementById("shuffleOn").style.display = 'initial';
                 document.getElementById("shuffleOff").style.display = 'none';
             }
         });
@@ -1321,16 +1412,29 @@ window.onSpotifyPlayerAPIReady = () => {
             clickedRow = document.getElementById(trackId);
             if (clickedRow == null) {
                 clickedRow = document.getElementById(current_track.linked_from.id);
+                if(document.getElementById("queueTable").rows.length > 1 && queueTracksMap.get(trackId) != undefined) {
+                    document.getElementById("queueTable").deleteRow(1);
+                    queueTracksMap.delete(trackId)
+                }
                 trackId = current_track.linked_from.id;
             }
-            // clickedRow.setAttribute("class", "active-row");
+            if(document.getElementById("queueTable").rows.length > 1 && queueTracksMap.get(trackId) != undefined) {
+                document.getElementById("queueTable").deleteRow(1);
+                queueTracksMap.delete(trackId)
+            }             // clickedRow.setAttribute("class", "active-row");
             changeActiveRowColor();
-            currentIndex = clickedRow.parentElement.value;
+            currentIndex = clickedRow.value;
             clickedRow.cells[2].innerHTML = "Today<i class='fa fa-plus' onclick='handleQueueClick()'>";
         }
 
         storeDate();
         fetchAnnotations();
+        if(document.getElementById("queueTable").rows.length > 4) {
+            document.getElementById("queueDiv").style.height = "280px";
+        }
+        else {
+            document.getElementById("queueDiv").style.height = "auto";
+        }
     });
 
     // Connect to the player!

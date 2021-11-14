@@ -174,8 +174,8 @@ html {
     width: 10px;
     height: 10px;
     border-radius: 5px;
-    background-color: orange;
-    color: orange;
+    background-color: #ff7700;
+    color: #ff7700;
     animation: dotFlashingOrange 1s infinite linear alternate;
     animation-delay: .5s;
 }
@@ -192,8 +192,8 @@ html {
     width: 10px;
     height: 10px;
     border-radius: 5px;
-    background-color: orange;
-    color: orange;
+    background-color: #ff7700;
+    color: #ff7700;
     animation: dotFlashingOrange 1s infinite alternate;
     animation-delay: 0s;
 }
@@ -203,15 +203,15 @@ html {
     width: 10px;
     height: 10px;
     border-radius: 5px;
-    background-color: orange;
-    color: orange;
+    background-color: #ff7700;
+    color: #ff7700;
     animation: dotFlashingOrange 1s infinite alternate;
     animation-delay: 1s;
 }
 
 @keyframes dotFlashingOrange {
     0% {
-        background-color: orange;
+        background-color: #ff7700;
     }
     50%,
     100% {
@@ -591,7 +591,7 @@ html {
 }
 
 .prettyTable tbody tr.active-row-orange {
-    color: orange;
+    color: #ff7700;
 }
 
 .prettyTable tbody tr.active-row-blue {
@@ -742,24 +742,7 @@ html {
     transition: visibility 0s, height 0.66s ease-out;
 }
 
-#waveformColorDropdown {
-    text-align: center;
-    width: 50%;
-    height: 10%;
-    font-size: 100%;
-    border-color: #333333;
-    border-bottom-color: #d3d3d3;
-    background-color: #333333;
-    color: #d3d3d3;
-    -webkit-appearance: none;
-
-}
-
-#waveformColorDropdown:hover{
-    cursor: pointer;
-}
-
-#annotationColorDropdown {
+#modalMenu select {
     text-align: center;
     width: 50%;
     height: 10%;
@@ -770,24 +753,7 @@ html {
     color: #d3d3d3;
     -webkit-appearance: none;
 }
-
-#annotationColorDropdown:hover{
-    cursor: pointer;
-}
-
-#timeBeforeAnnoDropdown {
-    text-align: center;
-    width: 50%;
-    height: 10%;
-    font-size: 100%;
-    border-color: #333333;
-    border-bottom-color: #d3d3d3;
-    background-color: #333333;
-    color: #d3d3d3;
-    -webkit-appearance: none;
-}
-
-#timeBeforeAnnoDropdown:hover{
+#modalMenu select:hover {
     cursor: pointer;
 }
 
@@ -815,7 +781,7 @@ html {
 
 #menuToggle a:hover
 {
-    color: green;
+    color: #ff7700;
 }
 
 .menuToggleBlack a:hover
@@ -835,7 +801,7 @@ html {
 
 .menuToggleOrange a:hover
 {
-    color: orange !important;
+    color: #ff7700 !important;
 }
 
 .menuToggleRed a:hover
@@ -985,6 +951,7 @@ html {
     border: 1px solid #888;
     width: 40%;
     height: 70%;
+    overflow-y: auto;
 }
 
 /* The Close Button */
@@ -1000,4 +967,21 @@ html {
     color: #000;
     text-decoration: none;
     cursor: pointer;
+}
+
+#queueDiv {
+    visibility: hidden;
+    position: absolute;
+    z-index: 9;
+    background-color: #4a4a4a;
+    text-align: center;
+    box-shadow: 0 0 20px rgb(0 0 0 / 75%);
+}
+
+#queueDivHeader {
+    padding: 10px;
+    cursor: move;
+    z-index: 10;
+    background-color: #4a4a4a;
+    color: #fff;
 }

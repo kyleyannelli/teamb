@@ -52,18 +52,17 @@
             <h1 style="text-align:center; color:#d3d3d3;">User Preferences</h1>
             <h2 style="text-align: center; color:#d3d3d3;">Waveform Color:</h2>
             <select id="waveformColorDropdown" onchange="updateModal()">
-                <option value="green" selected>Green</option>
+                <option value="#ff7700" selected>Orange</option>
+                <option value="green">Green</option>
                 <option value="black">Black</option>
-                <option value="orange">Orange</option>
                 <option value="#0277bd">Blue</option>
                 <option value="red">Red</option>
             </select>
             <br><br>
-            <br><br>
             <h2 style="text-align: center; color:#d3d3d3;">Annotation Color:</h2>
             <select id="annotationColorDropdown" onchange="updateModal()">
-                <option value="orange" selected>Orange</option>
-                <option value="black">Black</option>
+                <option value="black" selected>Black</option>
+                <option value="orange">Orange</option>
                 <option value="green">Green</option>
                 <option value="#0277bd">Blue</option>
                 <option value="red">Red</option>
@@ -71,9 +70,22 @@
             <br><br>
             <h2 style="text-align: center; color:#d3d3d3;">Time Before Annotation:</h2>
             <select id="timeBeforeAnnoDropdown" onchange="updateModal()">
-                <option value="10" selected>5 seconds</option>
-                <option value="20">10 seconds</option>
-                <option value="30">15 seconds</option>
+                <option value="5" selected>5 seconds</option>
+                <option value="10">10 seconds</option>
+                <option value="15">15 seconds</option>
+                <option value="20">20 seconds</option>
+                <option value="25">25 seconds</option>
+                <option value="30">30 seconds</option>
+            </select>
+            <br><br>
+            <h2 style="text-align: center; color:#d3d3d3;">Time After Annotation:</h2>
+            <select id="timeAfterAnnoDropdown" onchange="updateModal()">
+                <option value="5" selected>5 seconds</option>
+                <option value="10">10 seconds</option>
+                <option value="15">15 seconds</option>
+                <option value="20">20 seconds</option>
+                <option value="25">25 seconds</option>
+                <option value="30">30 seconds</option>
             </select>
         </div>
         <script>window.onclick = function(event) {
@@ -156,12 +168,30 @@
     </div>
 
     <div id="buttonArea" style="height: 0px; visibility: hidden;">
-        <i id="shuffleOff" class="fa fa-random" style="font-size:25px;position:absolute;left:5px;margin-top: 20px;" onclick="shuffle()"></i>
-        <i id="shuffleOn" class="fa fa-random" style="font-size:25px;position:absolute;left:5px;margin-top: 20px;color:green;" onclick="shuffleOff()"></i>
-        <i class="fa fa-backward" style="font-size:25px;margin-right:25px;vertical-align: super;" onclick="previous()"></i>
+        <i id="shuffleOff" class="fa fa-random" style="font-size:25px;vertical-align: super;" onclick="shuffle()"></i>
+        <i id="shuffleOn" class="fa fa-random" style="font-size:25px;vertical-align: super;color:#ff7700;" onclick="shuffleOff()"></i>
+        <i class="fa fa-backward" style="font-size:25px;margin-right:25px;margin-left:25px;vertical-align: super;" onclick="previous()"></i>
         <i id="pausePlay" class="fa fa-pause-circle-o" style="font-size:50px;display:none;" onclick="pause()"></i>
         <i id="playPause" class="fa fa-play-circle-o" style="font-size:50px;" onclick="handleResume()"></i>
         <i class="fa fa-forward" style="font-size:25px;margin-left: 25px;vertical-align: super;" onclick="next()"></i>
+        <i class="fa fa-list-ul" style="font-size:25px;margin-left: 25px;vertical-align: super;" onclick="handleQueueList()"></i>
+        <div id="queueDiv" style="visibility: hidden;overflow-y: scroll">
+            <div id="queueDivHeader">
+                <span onclick="handleQueueList()" class="close">&times;</span>
+               <h2>Player Queue</h2>
+                <table id="queueTable" class="prettyTable" style="height:0;">
+                    <thead>
+                    <tr>
+                        <th><strong>Title</strong></th>
+                        <th><strong>Artist</strong></th>
+                    </tr>
+                    </thead>
+                    <tbody id="queueTracks">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     <div id="trackDiv">
         <table id="tracksTable" class="prettyTable">
