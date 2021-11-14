@@ -44,13 +44,14 @@ var annotationColor = "orange";
 
 const AUTHORIZE = "https://accounts.spotify.com/authorize"
 const TOKEN = "https://accounts.spotify.com/api/token";
-const PLAYLISTS = "https://api.spotify.com/v1/me/playlists?limit=50";
+const PLAYLISTS = "https://api.spotify.com/v1/me/playlists";
 const PLAYLISTIMAGE = "https://api.spotify.com/v1/playlists/{playlist_id}/images";
 const DEVICES = "https://api.spotify.com/v1/me/player/devices";
 const PLAY = "https://api.spotify.com/v1/me/player/play";
 const PAUSE = "https://api.spotify.com/v1/me/player/pause";
 const NEXT = "https://api.spotify.com/v1/me/player/next";
 const PREVIOUS = "https://api.spotify.com/v1/me/player/previous";
+const ADDQUEUE = "https://api.spotify.com/v1/me/player/queue";
 const PLAYER = "https://api.spotify.com/v1/me/player";
 const TRACKS = "https://api.spotify.com/v1/playlists/{{PlaylistId}}/tracks";
 const ANALYSIS = "https://api.spotify.com/v1/audio-analysis/{id}";
@@ -676,8 +677,13 @@ function handleRowTrackClick() {
     if (clickedRow != null && clickedRow != "") clickedRow.setAttribute("class", "");
     clickedRow = event.target;
     changeActiveRowColor();
-    clickedRow.parentElement.cells[2].innerHTML = "Today";
+    clickedRow.parentElement.cells[2].innerHTML = "Today<i class='fa fa-plus' onclick='handleQueueClick()'>";
     play(clickedRow.parentElement.value);
+}
+
+function handleQueueClick() {
+    let desiredQueueTrackId = event.target.parentElement.parentElement.id;
+    addToQueue(desiredQueueTrackId);
 }
 
 /**
@@ -719,6 +725,10 @@ function next() {
 function previous() {
     progressMs = 0;
     callApi("POST", PREVIOUS + "?device_id=" + web_player_id, null, handleApiResponse);
+}
+
+function addToQueue(userQueueTrack) {
+    callApi("POST", ADDQUEUE + "?uri=spotify%3Atrack%3A" + userQueueTrack + "&device_id=" + web_player_id, null, handleApiResponse);
 }
 
 function getPlaylistImage(id) {
@@ -851,6 +861,10 @@ function addTrack(item, index) {
         let td2 = document.createElement("td");
         let td3 = document.createElement("td");
 
+        let addIcon = document.createElement("i");
+        addIcon.setAttribute("class", "fa fa-plus");
+        addIcon.setAttribute("onclick", "handleQueueClick()");
+
         let trackName = document.createTextNode(item.track.name);
         let artist = document.createTextNode(item.track.artists[0].name);
         let lastPlayed = document.createTextNode("Never Played");
@@ -874,14 +888,16 @@ function addTrack(item, index) {
         }
 
         td1.appendChild(trackName);
+        td1.setAttribute("onclick", "handleRowTrackClick()");
         td2.appendChild(artist);
+        td2.setAttribute("onclick", "handleRowTrackClick()");
         td3.appendChild(lastPlayed);
+        td3.appendChild(addIcon);
 
         node.appendChild(td1);
         node.appendChild(td2);
         node.appendChild(td3);
 
-        node.setAttribute("onclick", "handleRowTrackClick()");
         node.id = item.track.id;
         document.getElementById("tracks").appendChild(node);
         currentPlaylistJson.push({[node.value]: node.id});
@@ -1310,7 +1326,7 @@ window.onSpotifyPlayerAPIReady = () => {
             // clickedRow.setAttribute("class", "active-row");
             changeActiveRowColor();
             currentIndex = clickedRow.parentElement.value;
-            clickedRow.cells[2].innerHTML = "Today";
+            clickedRow.cells[2].innerHTML = "Today<i class='fa fa-plus' onclick='handleQueueClick()'>";
         }
 
         storeDate();

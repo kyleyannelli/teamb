@@ -551,6 +551,11 @@ html {
     padding: 12px 15px;
 }
 
+.prettyTable i {
+    font-size: 20px;
+    margin-left: 10px;
+}
+
 .prettyTable thead {
     background-color: #4a4a4a;
     color: lightgray;
