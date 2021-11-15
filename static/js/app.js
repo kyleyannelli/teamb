@@ -698,25 +698,27 @@ function handleRowTrackClick() {
 }
 
 function handleQueueClick() {
-    let desiredQueueTrackId = event.target.parentElement.parentElement.id;
-    event.target.setAttribute("class", "fa fa-check");
-    event.target.setAttribute("onclick", "");
-    addToQueue(desiredQueueTrackId);
+    if(document.getElementById("trackArtist").innerHTML != "") {
+        let desiredQueueTrackId = event.target.parentElement.parentElement.id;
+        event.target.setAttribute("class", "fa fa-check");
+        event.target.setAttribute("onclick", "");
+        addToQueue(desiredQueueTrackId);
 
-    let node = document.createElement("tr");
+        let node = document.createElement("tr");
 
-    let td1 = document.createElement("td");
-    let td2 = document.createElement("td");
-    let trackName = document.createTextNode(event.target.parentElement.parentElement.cells[0].innerHTML);
-    let artist = document.createTextNode(event.target.parentElement.parentElement.cells[1].innerHTML);
+        let td1 = document.createElement("td");
+        let td2 = document.createElement("td");
+        let trackName = document.createTextNode(event.target.parentElement.parentElement.cells[0].innerHTML);
+        let artist = document.createTextNode(event.target.parentElement.parentElement.cells[1].innerHTML);
 
-    td1.appendChild(trackName);
-    td2.appendChild(artist);
+        td1.appendChild(trackName);
+        td2.appendChild(artist);
 
-    node.appendChild(td1);
-    node.appendChild(td2);
-    document.getElementById("queueTracks").appendChild(node);
-    queueTracksMap.set(event.target.parentElement.parentElement.id, true);
+        node.appendChild(td1);
+        node.appendChild(td2);
+        document.getElementById("queueTracks").appendChild(node);
+        queueTracksMap.set(event.target.parentElement.parentElement.id, true);
+    }
 
 }
 

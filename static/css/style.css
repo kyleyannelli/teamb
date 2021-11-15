@@ -519,6 +519,7 @@ html {
 
 #trackDiv {
     width: 100%;
+    scroll-behavior: smooth;
     height: 400px;
     overflow-y: auto;
 }
