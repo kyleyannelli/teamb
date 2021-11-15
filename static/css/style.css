@@ -2,6 +2,7 @@ html {
     background-color: #333333;
     overflow-x: hidden;
     font-family: Arial, sans-serif;
+    scroll-behavior: smooth;
 }
 
 #dotsDiv {
@@ -680,6 +681,11 @@ html {
 #trackInfo {
     height: 350px;
     text-align: center;
+}
+
+#trackInfo a{
+    text-decoration: none;
+    color: #d3d3d3
 }
 
 #canvasBg {

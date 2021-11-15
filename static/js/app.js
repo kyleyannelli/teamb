@@ -687,11 +687,14 @@ function play(index) {
 }
 
 function handleRowTrackClick() {
-    if (clickedRow != null && clickedRow != "") clickedRow.setAttribute("class", "");
-    clickedRow = event.target;
-    changeActiveRowColor();
-    clickedRow.parentElement.cells[2].innerHTML = "Today<i class='fa fa-plus' onclick='handleQueueClick()'>";
-    play(clickedRow.parentElement.value);
+        if(queueTracksMap.get(event.target.parentElement.id) != undefined || queueTracksMap.get(event.target.parentElement.id) != null) {
+            return;
+        }
+        if (clickedRow != null && clickedRow != "") clickedRow.setAttribute("class", "");
+        clickedRow = event.target;
+        changeActiveRowColor();
+        clickedRow.parentElement.cells[2].innerHTML = "Today<i class='fa fa-plus' onclick='handleQueueClick()'>";
+        play(clickedRow.parentElement.value);
 }
 
 function handleQueueClick() {
@@ -1015,13 +1018,13 @@ function handleCurrentlyPlayingResponse() {
             }
             if (currentTrackTitle != data.item.name) {
                 $("#trackTitle").fadeOut(function () {
-                    $(this).text(data.item.name).fadeIn();
+                    $(this).html("<a href='#" + data.item.id + "'>" + data.item.name + "</a>").fadeIn();
                 });
                 currentTrackTitle = data.item.name;
             }
             if (currentTrackArtist != data.item.artists[0].name) {
                 $("#trackArtist").fadeOut(function () {
-                    $(this).text(data.item.artists[0].name).fadeIn();
+                    $(this).html("<a href='#" + data.item.id + "'>" + data.item.artists[0].name + "</a>").fadeIn();
                 });
                 currentTrackArtist = data.item.artists[0].name;
             }
