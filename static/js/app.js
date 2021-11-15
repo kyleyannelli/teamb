@@ -357,6 +357,7 @@ function switchPlaylistSelection() {
     currentPlaylistJson = [];
     clickedRow = "";
     trackId = "";
+    currentMarkedAnnotations = new Map();
 }
 
 function controlMenu() {
@@ -538,7 +539,7 @@ function storeAnnotation() {
     let trackIndex = currentIndex;
     let arrayIndex = 0;
     if (trackIndex > 99) {
-        arrayIndex = trackIndex.charAt(0);
+        arrayIndex = String(trackIndex).charAt(0);
     }
     trackIndex -= (100 * arrayIndex);
     let id = jsonArray[arrayIndex].items[trackIndex].track.id;
@@ -573,7 +574,7 @@ function removeAnnotation() {
     let trackIndex = currentIndex; //dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
     if (trackIndex > 99) {
-        arrayIndex = trackIndex.charAt(0);
+        arrayIndex = String(trackIndex).charAt(0);
     }
     trackIndex -= (100 * arrayIndex);
     let milliseconds = (MM * 60000) + (SS * 1000);
@@ -603,13 +604,11 @@ function handleUserIdResponse() {
 
 
 function fetchAnnotations() {
-    //let dropdown = document.getElementById("tracks");
-    let trackIndex = currentIndex;//dropdown.options[dropdown.selectedIndex].value;
     let arrayIndex = 0;
-    if (trackIndex > 99) {
-        arrayIndex = trackIndex.charAt(0);
+    if (currentIndex > 99) {
+        arrayIndex = String(currentIndex).charAt(0);
     }
-    trackIndex -= (100 * arrayIndex);
+    let trackIndex = currentIndex - (100 * arrayIndex);
     if (userId != '' && jsonArray[arrayIndex].items[trackIndex].track != null) callApi("GET", RETRIEVE + "?uid=" + userId + "&track=" + jsonArray[arrayIndex].items[trackIndex].track.id + "&access_token=" + localStorage.getItem("access_token"), null, handleAnnotationsResponse)
 }
 
@@ -869,7 +868,6 @@ function handlePauseResponse() {
  * when a user selects a annotation from the box, the text and time fields are filled
  */
 function setAnnotationFields() {
-    $(window).scrollTop(0);
     let annotationTable = event.target.parentElement;
     let text = annotationTable.value;
     let storedMs = annotationTable.id;
@@ -1220,7 +1218,7 @@ function drawWaveform(data, id, offset) {
                         for (let a = 0; a < currentSongAnnotations.length; a++) {
                             let annotation = currentSongAnnotations[a];
                             let splitIndex = annotation.lastIndexOf(":");
-                            let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length))
+                            let ms = parseInt(annotation.substring(splitIndex + 1, annotation.length));
                             let percentage = ms / currentDuration;
                             if (((x / width) > (percentage) && (percentage + .01) > (x / width)) && currentMarkedAnnotations.get(annotation) == undefined) {
                                 check = true;
@@ -1335,6 +1333,9 @@ window.onSpotifyPlayerAPIReady = () => {
         console.log('Ready with Device ID', data.device_id);
         web_player_id = data.device_id;
         playerReady = true;
+        $("#waitingDiv").fadeOut(function () {
+            document.getElementById("waitingDiv").style.display = "none";
+        });
     });
     //console.log(userId);
 
