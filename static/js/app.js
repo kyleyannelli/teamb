@@ -699,8 +699,6 @@ function handleQueueClick() {
     addToQueue(desiredQueueTrackId);
 
     let node = document.createElement("tr");
-    node.value = event.target.parentElement.parentElement.value;
-    node.id = event.target.parentElement.parentElement.id;
 
     let td1 = document.createElement("td");
     let td2 = document.createElement("td");
