@@ -39,16 +39,18 @@ var currentMarkedAnnotations = new Map();
 var queueTracksMap = new Map();
 var lastPlayedSongId = "";
 var nextAnnotation = "";
+//default colors
 var waveformColor = "#ff7700";
 var timeBeforeAnno = 5;
 var timeAfterAnno = 5;
 var annotationColor = "black";
+
 var firstSongPlayed = true;
 var playerReady = false;
 
-const AUTHORIZE = "https://accounts.spotify.com/authorize"
+const AUTHORIZE = "https://accounts.spotify.com/authorize";
 const TOKEN = "https://accounts.spotify.com/api/token";
-const PLAYLISTS = "https://api.spotify.com/v1/me/playlists";
+const PLAYLISTS = "https://api.spotify.com/v1/me/playlists?limit=50";
 const PLAYLISTIMAGE = "https://api.spotify.com/v1/playlists/{playlist_id}/images";
 const DEVICES = "https://api.spotify.com/v1/me/player/devices";
 const PLAY = "https://api.spotify.com/v1/me/player/play";
@@ -115,7 +117,6 @@ function switchPlayerMode() {
             $("#playlistName").text(playlistName).fadeIn();
         }, 500);
         //hide present
-        //document.getElementById("presentSection").style.display = 'none';
         fetchTracks();
         progressMs = 0;
         firstSongPlayed = true;
@@ -252,7 +253,6 @@ function presentAnnotations() {
                 document.getElementById("nextAnnotation").innerHTML = "";
             }
         } else if (i == 0) {
-            //$("#currentAnnotation").text("").fadeOut();
             if (document.getElementById("presentSection").style.visibility == "visible") {
                 document.getElementById("presentSection").style.height = "100px";
             }
@@ -275,20 +275,6 @@ function presentAnnotations() {
                     break;
             }
         }
-        // else if(i == 0 && progressMs >= ms + 5000) {
-        //     if(lastStoredAnno == anno) break;
-        //     $("#currentAnnotation").fadeOut(function() {
-        //         //$(this).text("").fadeIn();
-        //     });
-        //     document.getElementById("dotsDiv").setAttribute("class", "dot-flashing");
-        // }
-        // else if(i == 0) {
-        //     document.getElementById("dotsDiv").setAttribute("class", "dot-flashing");
-        // }
-        // else {
-        //
-        //     document.getElementById("dotsDiv").setAttribute("class", "dot-flashing");
-        // }
     }
 
 }
@@ -299,20 +285,13 @@ function wait() {
 
 function switchPresentMode() {
     //hide player stuff
-    //document.getElementById("playerSection").style.display = 'none';
     //hide playlist selection
-    // setTimeout(fetchAnnotations, 500);
     if (document.getElementById("presentSection").style.visibility == 'hidden') {
         document.getElementById("presentSection").style.visibility = 'visible';
         document.getElementById("presentSection").style.height = "100px";
-
         if (document.getElementById("annotationSection").style.visibility == "hidden") {
             document.getElementById("trackInfo").setAttribute("class", "shrink");
         }
-
-
-        //document.getElementById("trackArtist").style.display = "none";
-        //document.getElementById("trackTitle").style.display = "none";
         setTimeout(wait, 500);
     } else {
         document.getElementById("presentSection").style.height = "0px";
@@ -322,7 +301,6 @@ function switchPresentMode() {
         }
 
         setTimeout(wait, 500);
-        //document.getElementById("trackInfo").style.transform = "scale(1)";
     }
 
     setTimeout(fetchAnnotations, 500);
@@ -405,7 +383,7 @@ function requestAuthorization() {
     url += "&redirect_uri=" + encodeURI(redirect_uri);
     url += "&show_dialog=true";
     url += "&scope=user-read-private user-read-email user-modify-playback-state user-read-playback-position user-library-read streaming user-read-playback-state user-read-recently-played playlist-read-private";
-    window.location.href = url; // Show Spotify's authorization screen
+    window.location.href = url;
 }
 
 function fetchAccessToken(code) {
@@ -435,7 +413,6 @@ function handleAuthorizationResponse() {
         }
     } else {
         console.log(this.responseText);
-        //alert(this.responseText);
     }
 }
 
@@ -499,8 +476,6 @@ function addPlaylist(item) {
 function handlePlaylistClick() {
     playlistName = event.target.innerHTML;
     playlistId = event.target.parentElement.value;
-    //console.log(playlistId);
-    // console.log(playlistId.value);
     setTimeout(function () {
         switchPlayerMode();
     }, 500);
@@ -573,7 +548,7 @@ function removeAnnotation() {
 
     // Get User
     //let dropdown = document.getElementById("tracks");
-    let trackIndex = currentIndex; //dropdown.options[dropdown.selectedIndex].value;
+    let trackIndex = currentIndex;
     let arrayIndex = 0;
     if (trackIndex > 99) {
         arrayIndex = String(trackIndex).charAt(0);
@@ -584,8 +559,6 @@ function removeAnnotation() {
     let removalData = "?uid=" + userId + "&track=" + id + "&sec=" + milliseconds + "&access_token=" + localStorage.getItem("access_token");
     //send off to mongodb
     callApi("GET", REMOVE + removalData, null, null)
-    //refresh annotations for currently selected song
-    //refreshAnnotations()
     setTimeout(fetchAnnotations, 500);
     document.getElementById("annotationText").value = "";
     document.getElementById("annotationMin").value = "";
@@ -596,7 +569,6 @@ function handleUserIdResponse() {
     if (this.status == 200) {
         userId = JSON.parse(this.responseText)["id"];
         localStorage.setItem("userId", userId);
-        //console.log("UserID in Handle " + userId);
         refreshAccessToken();
     } else {
         console.log(this.responseText);
@@ -622,11 +594,9 @@ function handleAnnotationsResponse() {
         removeAllItems("songAnnotations");
         for (var key in data) {
             addAnnotations(data[key], key)
-            // console.log(data[key], key)
         }
     } else {
         console.log(this.responseText);
-        //alert(this.responseText);
     }
 }
 
@@ -658,11 +628,10 @@ function addAnnotations(annotation, seconds) {
 function addTrackAnnotation(item, index) {
     let node = document.createElement("option");
     node.value = index + currentSongsOffset;
-    // document.body.style.backgroundImage = "url('" + data.item.album.images[0].url + "')";
-    // let albumImage = "img src = '" + "url('" + data.item.album.images[0].url + "')" + "'";
+
     node.innerHTML = item.track.name + " (" + item.track.artists[0].name + ")";
     node.src = item.track.album.images[0].url;
-    // "url('" + data.item.album.images[0].url + "')";
+
     document.getElementById("annotationTrack").appendChild(node);
 }
 
@@ -726,15 +695,6 @@ function handleQueueClick() {
  * plays song from specified time position
  */
 function seek(position) {
-    // let trackIndex;
-    // if(trackId == "") {
-    //     trackIndex = 0;
-    // }
-    // else {
-    //     for(let i in currentPlaylistJson) {
-    //         if(currentPlaylistJson[i][i] == trackId) trackIndex = i;
-    //     }
-    // }
     lastStoredAnno = "";
     let body = {};
     body.context_uri = "spotify:playlist:" + playlistId;
@@ -768,9 +728,8 @@ function addToQueue(userQueueTrack) {
 }
 
 function getPlaylistImage(id) {
-    //console.log(id);
     let updatedUrl = PLAYLISTIMAGE.replace("{playlist_id}", id);
-    //console.log(updatedUrl);
+
     callApi("GET", updatedUrl, null, handlePlaylistImage);
 }
 
@@ -851,7 +810,6 @@ function handleApiResponse() {
         refreshAccessToken()
     } else {
         console.log(this.responseText);
-        //alert(this.responseText);
     }
 }
 
@@ -880,7 +838,6 @@ function setAnnotationFields() {
     var minutesPro = Math.floor(timePro / 60);
     var secPro = timePro - minutesPro * 60 + '';
     document.getElementById("annotationText").value = text;
-    // document.getElementById("annotationText").value = minutesPro + ":" + secPro.padStart(2,'0');
     document.getElementById("annotationMin").value = minutesPro;
     document.getElementById("annotationSec").value = secPro.padStart(2, '0');
     seek(storedMs);
@@ -892,10 +849,6 @@ function setAnnotationFields() {
 function fetchTracks() {
     currentSongsOffset = 0;
     removeAllItems("tracks");
-    // let playlist_id = document.getElementById("playlists").value;
-    // let playlist = document.getElementById("playlists");
-    // let playlist_size = playlist.options[playlist.selectedIndex].innerText.split("(")[1];
-    // playlist_size = playlist_size.substring(0, playlist_size.length - 1);
     if (playlistId.length > 0) {
         let url = TRACKS.replace("{{PlaylistId}}", playlistId);
         //reset jsonarray here otherwise the previous playlists would still be stored
@@ -914,7 +867,6 @@ function handleDatesResponse() {
         if (localUID != null) userId = localUID;
         currentPlaylistDates = [];
         var data = JSON.parse(this.responseText);
-        // console.log(data);
         removeAllItems("songAnnotations");
         for (var key in data) {
             currentPlaylistDates.push({[key]: data[key]});
@@ -928,12 +880,8 @@ function handleDatesResponse() {
 function handleTracksResponse() {
     if (this.status == 200) {
         var data = JSON.parse(this.responseText);
-        // previousCurrentSongs = currentSongs
-        // currentSongs = Object.assign(previousCurrentSongs, data)
         jsonArray.push(data);
-        //console.log(data);
         data.items.forEach((item, index) => addTrack(item, index));
-        //console.log(data.next);
         if (data.next != null) {
             currentSongsOffset += 100;
             callApi("GET", data.next, null, handleTracksResponse);
@@ -942,7 +890,6 @@ function handleTracksResponse() {
         refreshAccessToken()
     } else {
         console.log(this.responseText);
-        //alert(this.responseText);
     }
 }
 
@@ -959,6 +906,7 @@ function addTrack(item, index) {
         addIcon.setAttribute("onclick", "handleQueueClick()");
 
         let trackName = document.createTextNode(item.track.name);
+        if(item.track.name == "") return;
         let artist = document.createTextNode(item.track.artists[0].name);
         let lastPlayed = document.createTextNode("Never Played");
         for (let i in currentPlaylistDates) {
@@ -1069,7 +1017,6 @@ function onRadioButton(deviceId, playlistId) {
     body.offset.position = 0;
     body.offset.position_ms = 0;
     callApi("PUT", PLAY + "?device_id=" + deviceId, JSON.stringify(body), handleApiResponse);
-    //callApi( "PUT", SHUFFLE + "?state=true&device_id=" + deviceId, null, handleApiResponse );
 }
 
 function addRadioButton(item, index) {
@@ -1204,7 +1151,6 @@ function drawWaveform(data, id, offset) {
     canvas.height = height;
 
     let context = canvas.getContext('2d');
-    //console.log(width);
     for (let x = 0; x < width; x++) {
         if (x % 8 == 0) {
             let i = Math.ceil(data.length * (x / width));
@@ -1342,11 +1288,6 @@ window.onSpotifyPlayerAPIReady = () => {
             document.getElementById("waitingDiv").style.display = "none";
         });
     });
-    //console.log(userId);
-
-
-
-
 
     player.addListener('player_state_changed', ({paused, position, duration, track_window: {current_track}}) => {
         for (let i in currentPlaylistJson) {
@@ -1409,7 +1350,6 @@ window.onSpotifyPlayerAPIReady = () => {
             if (currentPlaylistJson[i][i] == trackId) document.getElementById("tracks").value = i;
             if (currentPlaylistJson[i][i] == current_track.linked_from.id) document.getElementById("tracks").value = i;
         }
-
 
         if (clickedRow != null) {
             if (clickedRow != "") {
