@@ -119,6 +119,8 @@ function switchPlayerMode() {
         fetchTracks();
         progressMs = 0;
         firstSongPlayed = true;
+        $("#queueTable tbody tr").remove();
+        document.getElementById("queueDiv").style.height = "auto";
     }
 }
 
