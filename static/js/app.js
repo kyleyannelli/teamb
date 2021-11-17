@@ -504,9 +504,13 @@ function storeAnnotation() {
     let sec = String(document.getElementById("annotationSec").value)
     // let milliseconds = (MMSS * 60000) + (MMSSArray[1] * 1000);
     let milliseconds = (min * 60000) + (sec * 1000);
+    if(milliseconds > duration || milliseconds < 0) {
+        alert("Specified timestamp is beyond the current song's duration.");
+        return false;
+    }
     //make sure form isn't empty
     if (annotation == '' || min == '' || sec == '') {
-        alert("Please enter both the annotation and timestamp.")
+        alert("Please enter both the annotation and timestamp.");
         return false
     } else if (!(min >= 0) || !(sec >= 0 && sec <= 59)) {
         alert("Please enter a valid time.");
@@ -1286,6 +1290,7 @@ window.onSpotifyPlayerAPIReady = () => {
         playerReady = true;
         $("#waitingDiv").fadeOut(function () {
             document.getElementById("waitingDiv").style.display = "none";
+            document.documentElement.style.overflowY = "auto";
         });
     });
 

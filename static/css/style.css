@@ -1,6 +1,7 @@
 html {
     background-color: #333333;
     overflow-x: hidden;
+    overflow-y: hidden;
     font-family: Arial, sans-serif;
     scroll-behavior: smooth;
 }
