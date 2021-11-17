@@ -504,7 +504,10 @@ function storeAnnotation() {
     let sec = String(document.getElementById("annotationSec").value)
     // let milliseconds = (MMSS * 60000) + (MMSSArray[1] * 1000);
     let milliseconds = (min * 60000) + (sec * 1000);
-    if(milliseconds > duration || milliseconds < 0) {
+    /**
+     * check that the specified timestamp is within bounds of the song, else alert and return
+     */
+    if(milliseconds > currentDuration || milliseconds < 0) {
         alert("Specified timestamp is beyond the current song's duration.");
         return false;
     }
