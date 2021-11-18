@@ -6,10 +6,8 @@ from flask import render_template
 from flask import request
 from flask import jsonify
 from pymongo import MongoClient
-from random import randint
 from jsonmerge import merge
 import requests
-import random
 # KEEP ALL SSL, NEEDED HTTPS FOR WEB PLAYER
 import ssl
 import re
@@ -26,7 +24,7 @@ context.load_cert_chain('certificate.crt', 'private.key')
 mongo_url = os.getenv('mongoUrl')
 client = MongoClient(mongo_url)
 db = client.annotations
-
+uri = 'https://teamb.dev:2052/player'
 app = Flask(__name__)
 IS_DEV = app.env == 'development'  # FLASK_ENV env. variable
 
@@ -56,7 +54,7 @@ def getAuthorization():
     payload = {
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': 'https://teamb.dev:2052/player',
+        'redirect_uri': uri,
         'client_id': client_id,
         'client_secret': client_secret,
     }
@@ -84,7 +82,7 @@ def getAccess():
     payload = {
         'grant_type': 'refresh_token',
         'refresh_token': rt,
-        'redirect_uri': 'https://teamb.dev:2052/player',
+        'redirect_uri': uri,
         'client_id': client_id,
         'client_secret': client_secret,
     }

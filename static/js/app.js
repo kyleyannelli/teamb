@@ -1,5 +1,3 @@
-var redirect_uri = "https://teamb.dev:2052/player";
-
 var client_id = "";
 var playlistId = "";
 var waveformTop = true;
@@ -39,20 +37,23 @@ var currentMarkedAnnotations = new Map();
 var queueTracksMap = new Map();
 var lastPlayedSongId = "";
 var nextAnnotation = "";
-//default colors
+var firstSongPlayed = true;
+var playerReady = false;
+
+/**
+ * SETTINGS DEFAULTS
+ */
 var waveformColor = "#ff7700";
 var timeBeforeAnno = 5;
 var timeAfterAnno = 5;
 var annotationColor = "black";
 
-var firstSongPlayed = true;
-var playerReady = false;
-
+/**
+ * SPOTIFY URIS
+ */
 const AUTHORIZE = "https://accounts.spotify.com/authorize";
-const TOKEN = "https://accounts.spotify.com/api/token";
 const PLAYLISTS = "https://api.spotify.com/v1/me/playlists?limit=50";
 const PLAYLISTIMAGE = "https://api.spotify.com/v1/playlists/{playlist_id}/images";
-const DEVICES = "https://api.spotify.com/v1/me/player/devices";
 const PLAY = "https://api.spotify.com/v1/me/player/play";
 const PAUSE = "https://api.spotify.com/v1/me/player/pause";
 const NEXT = "https://api.spotify.com/v1/me/player/next";
@@ -61,16 +62,22 @@ const ADDQUEUE = "https://api.spotify.com/v1/me/player/queue";
 const PLAYER = "https://api.spotify.com/v1/me/player";
 const TRACKS = "https://api.spotify.com/v1/playlists/{{PlaylistId}}/tracks";
 const ANALYSIS = "https://api.spotify.com/v1/audio-analysis/{id}";
-const CURRENTLYPLAYING = "https://api.spotify.com/v1/me/player/currently-playing";
 const SHUFFLE = "https://api.spotify.com/v1/me/player/shuffle";
 const USER = "https://api.spotify.com/v1/me";
-const INSERT = "https://teamb.dev:2052/insert";
-const RETRIEVE = "https://teamb.dev:2052/retrieve";
-const INSERTDATE = "https://teamb.dev:2052/insertDate";
-const RETRIEVEDATES = "https://teamb.dev:2052/retrieveDates";
-const REMOVE = "https://teamb.dev:2052/remove"
-const AUTHORIZETEAMB = "https://teamb.dev:2052/authorization"
-const REFRESHTEAMB = "https://teamb.dev:2052/refreshAccessToken";
+
+/**
+ * ANNOTATION & DATE DATABASE URIs
+ */
+// Change base_uri to match your domain
+var base_uri = "https://teamb.dev:2052/";
+var redirect_uri = base_uri + "player";
+const INSERT = base_uri + "insert";
+const RETRIEVE = base_uri + "retrieve";
+const INSERTDATE = base_uri + "insertDate";
+const RETRIEVEDATES = base_uri + "retrieveDates";
+const REMOVE = base_uri + "remove"
+const AUTHORIZETEAMB = base_uri + "authorization"
+const REFRESHTEAMB = base_uri + "refreshAccessToken";
 
 function onPageLoad() {
     client_id = localStorage.getItem("client_id");
@@ -353,7 +360,7 @@ function controlMenu() {
  */
 function logout() {
     localStorage.clear();
-    window.location.href = "https://teamb.dev:2052";
+    window.location.href = base_uri;
     return false;
 }
 
