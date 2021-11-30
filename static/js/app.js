@@ -1276,6 +1276,17 @@ function storeDate() {
     callApi("GET", INSERTDATE + dateData, null, null)
 }
 
+window.addEventListener('keydown', function(e) {
+    if(e.keyCode == 32 && e.target == document.body){
+        e.preventDefault();
+        if(isPaused){
+            document.getElementById("playPause").click();
+        } else {
+            document.getElementById("pausePlay").click();
+        }
+    }
+});
+
 /**
  * Set up the Web Playback SDK
  */
@@ -1338,15 +1349,14 @@ window.onSpotifyPlayerAPIReady = () => {
             }
         });
 
-
         progressMs = position;
         clearInterval(playerInterval)
         isPaused = paused;
         if (isPaused) {
-            document.getElementById("playPause").style.display = 'contents';
+            document.getElementById("playPause").style.display = 'inline';
             document.getElementById("pausePlay").style.display = 'none';
         } else {
-            document.getElementById("pausePlay").style.display = 'contents';
+            document.getElementById("pausePlay").style.display = 'inline';
             document.getElementById("playPause").style.display = 'none';
         }
 
